@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>STARS: A Survival Story</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#0b0f1a;--bg2:#111830;--card:rgba(255,255,255,.07);--line:rgba(255,255,255,.14);--text:#ece8db;--muted:#9aa3b5;--amber:#f5b942;--gold:#ffd97a;--green:#7ed491;--red:#ff7a6b;--blue:#7ab8ff}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:96px}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit;background:#0e1526;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;font-size:15px}
+input[type=range]{padding:0}
+label{font-size:13px;color:var(--muted);display:block;margin:10px 0 4px}
+h1{font-size:26px;margin:8px 0}
+h2{font-size:19px;margin:14px 0 8px}
+h3{font-size:16px;margin:12px 0 6px}
+p{line-height:1.5}
+.small{font-size:13px;color:var(--muted)}
+.gold{color:var(--gold)}
+.amber{color:var(--amber)}
+.card{background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.04));border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.btn{display:inline-block;background:var(--amber);color:#1a1200;border:0;border-radius:12px;padding:11px 18px;font-weight:700;font-size:15px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn2{display:inline-block;background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px}
+.btnsm{padding:7px 11px;font-size:13px;border-radius:9px}
+.btn,.btn2{min-height:44px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bar{height:10px;background:rgba(255,255,255,.12);border-radius:6px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--amber);border-radius:6px}
+.bar.green>i{background:var(--green)}
+.bar.red>i{background:var(--red)}
+.bar.blue>i{background:var(--blue)}
+.stat{display:grid;grid-template-columns:86px 1fr 34px;gap:8px;align-items:center;font-size:13px;margin:5px 0}
+.stat b{text-align:right;font-weight:600}
+#hud{position:fixed;left:0;right:0;max-width:560px;margin:0 auto;top:0;z-index:20;background:rgba(11,15,26,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:10px 14px}
+#hudtop{display:flex;justify-content:space-between;align-items:center;font-size:14px}
+#game{padding-top:156px}
+#msg{background:rgba(245,185,66,.14);border:1px solid rgba(245,185,66,.45);border-radius:12px;padding:10px 12px;margin:12px 14px 0;font-size:14px;display:none}
+#msg.show{display:block}
+.view{display:none;padding:0 14px}
+.view.on{display:block}
+#tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(13,19,36,.96);border-top:1px solid var(--line);display:flex;max-width:560px;margin:0 auto}
+#tabbar button{flex:1;background:none;border:0;color:var(--muted);padding:8px 1px 9px;font-size:9px;display:flex;flex-direction:column;align-items:center;gap:3px}
+#tabbar button.on{color:var(--gold)}
+#tabbar svg{width:22px;height:22px}
+.pill{display:inline-block;background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px}
+.jobcard{border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;background:rgba(255,255,255,.05);width:100%;text-align:left;color:var(--text)}
+.jobcard.sel{border-color:var(--amber);background:rgba(245,185,66,.13)}
+.optbtn{border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--text);border-radius:10px;padding:8px 10px;font-size:13px}
+.optbtn.sel{border-color:var(--amber);background:rgba(245,185,66,.18);color:var(--gold)}
+.attrrow{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.attrrow button{width:44px;height:44px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.1);color:var(--text);font-size:18px}
+.itemrow{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.itemrow b{font-size:14px}
+.itemrow span{font-size:12px;color:var(--muted)}
+#intro{position:fixed;inset:0;z-index:50;background:#05070f;overflow:hidden;display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px 22px}
+#intro.on{display:flex}
+#stars{position:absolute;inset:0;overflow:hidden}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 3s infinite ease-in-out}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:1}}
+#introtext{position:relative;z-index:2;max-width:520px;width:100%;font-size:19px;line-height:1.7;min-height:220px;cursor:pointer}
+#introtext .beat{display:block;margin:0 0 16px}
+#introbtns{position:relative;z-index:2;display:flex;gap:10px;margin-top:18px}
+.hidden{display:none!important}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.newsitem{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.newsitem b{font-size:14px}
+.plot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.plotbox{border:1px solid var(--line);border-radius:14px;padding:12px;background:rgba(255,255,255,.05)}
+body.day{background:#dfe4ea;color:#1b2434}
+body.day .card{background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(255,255,255,.6));border-color:rgba(0,0,0,.15)}
+body.day .small{color:#5a6472}
+body.day #hud{background:rgba(242,244,247,.97)}
+body.day #tabbar{background:rgba(242,244,247,.98)}
+body.day #tabbar button{color:#5a6472}
+body.day input,body.day select{background:#fff;color:#1b2434;border-color:rgba(0,0,0,.2)}
+body.day .jobcard{background:rgba(0,0,0,.04)}
+body.day .optbtn{background:rgba(0,0,0,.05);color:#1b2434}
+body.day .bar{background:rgba(0,0,0,.14)}
+body.day .plotbox{background:rgba(0,0,0,.04)}
+body.day #msg{background:rgba(245,185,66,.25)}
+body.day #intro{background:#05070f;color:#ece8db}
+@media (prefers-reduced-motion:reduce){.star{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="start" style="padding:28px 20px;text-align:center">
+  <p class="pill">STARS: A Survival Story</p>
+  <h1>STARS</h1>
+  <p>A survival story in a world after the flu. One survivor, one dog, one radio, one night sky.</p>
+  <div class="card" style="text-align:left">
+    <h2>Choose how to play</h2>
+    <button class="btn" id="testLoginBtn" type="button" style="width:100%;padding:14px">Test Player Login</button>
+    <p class="small">One tap, no password. Logs in as a labeled TEST survivor with a full kit so every system can be tried at once. Test progress is stored separately and never touches your real survivor.</p>
+    <button class="btn" id="newSurvivorBtn" type="button" style="width:100%;padding:14px;margin-top:10px">New Survivor</button>
+    <p class="small">The normal playable path: intro story, then character creator, then the real game.</p>
+    <div id="continueWrap" class="hidden">
+      <button class="btn2" id="continueBtn" type="button" style="width:100%;padding:14px;margin-top:10px">Continue my survivor</button>
+      <p class="small" id="continueName"></p>
+    </div>
+    <p class="small" id="startNote"></p>
+  </div>
+  <p class="small">Multiplayer and live clan sharing arrive later. Nothing here pretends to be another real player.</p>
+</div>
+
+<div id="intro" aria-label="Intro story">
+  <div id="stars" aria-hidden="true"></div>
+  <div id="introtext" role="button" aria-label="Intro story text, tap to speed up"></div>
+  <div id="introbtns">
+    <button class="btn2" id="introSkip" type="button">Skip</button>
+    <button class="btn hidden" id="introBegin" type="button">Begin</button>
+  </div>
+  <p class="small" style="position:relative;z-index:2;margin-top:14px">Tap the text to speed it up. Skip jumps straight ahead.</p>
+</div>
+
+<div id="creator" class="hidden" style="padding:16px">
+  <p class="pill">STARS: A Survival Story</p>
+  <h1>Who survives the night?</h1>
+  <p class="small">Create your survivor. Your city becomes your home in the new world. Nothing here is shared with anyone. Your save lives on this device only.</p>
+  <div class="card">
+    <label for="cName">Survivor name</label>
+    <input id="cName" maxlength="24" placeholder="Type your name">
+    <div style="text-align:center;margin:14px 0 4px" id="avatarPreview" aria-label="Avatar preview"></div>
+    <label>Skin tone</label>
+    <div class="row" id="skinRow"></div>
+    <label>Hair style</label>
+    <div class="row" id="hairRow"></div>
+    <label>Hair color</label>
+    <div class="row" id="hairColorRow"></div>
+    <label>Jacket color</label>
+    <div class="row" id="jacketRow"></div>
+  </div>
+  <div class="card">
+    <h2>Choose your job</h2>
+    <p class="small">Each job starts with different skills and gear, and a different daily shift.</p>
+    <div id="jobList"></div>
+  </div>
+  <div class="card">
+    <h2>Attributes</h2>
+    <p class="small">You have <b class="gold" id="pointsLeft">5</b> extra points to distribute.</p>
+    <div id="attrList"></div>
+  </div>
+  <div class="card">
+    <h2>Where are you?</h2>
+    <p class="small">Your city becomes the city in the game, and it sets your weather. Only the city name is saved, never your exact position, and never a home address.</p>
+    <button class="btn2" id="geoBtn" type="button">Use my city</button>
+    <p class="small" id="geoStatus"></p>
+    <label for="cCity">City</label>
+    <input id="cCity" maxlength="60" placeholder="City">
+    <label for="cCountry">Country</label>
+    <input id="cCountry" maxlength="60" placeholder="Country">
+    <label for="cBase">Home base name</label>
+    <input id="cBase" maxlength="40" placeholder="For example: The Old Garage">
+  </div>
+  <button class="btn" id="startBtn" type="button" style="width:100%;padding:14px">Start surviving</button>
+  <p class="small" id="createError" style="color:var(--red)"></p>
+</div>
+
+<div id="game" class="hidden">
+  <div id="hud">
+    <div id="hudtop">
+      <span><b id="hudName">Survivor</b> <span class="small" id="hudCity"></span></span>
+      <span><span id="clock">--:--</span> <span class="pill" id="dayPill">Day 1</span> <span class="pill hidden" id="testBanner">TEST</span> <span class="pill" id="dayNightPill">Night</span> <button class="btn2 btnsm" id="watchBtn" type="button">Watch</button></span>
+    </div>
+    <p class="small" style="margin:6px 0 0" id="sunTimes"></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:8px">
+      <div class="stat"><span>Health</span><div class="bar green"><i id="barHealth" style="width:100%"></i></div><b id="numHealth">100</b></div>
+      <div class="stat"><span>Hunger</span><div class="bar"><i id="barHunger" style="width:100%"></i></div><b id="numHunger">100</b></div>
+      <div class="stat"><span>Thirst</span><div class="bar blue"><i id="barThirst" style="width:100%"></i></div><b id="numThirst">100</b></div>
+      <div class="stat"><span>Energy</span><div class="bar"><i id="barEnergy" style="width:100%"></i></div><b id="numEnergy">100</b></div>
+      <div class="stat"><span>Morale</span><div class="bar"><i id="barMorale" style="width:100%"></i></div><b id="numMorale">100</b></div>
+      <div class="stat"><span>Caps</span><div></div><b class="gold" id="hudCaps">0</b></div>
+    </div>
+    <div class="stat" style="margin-top:6px"><span>Level <b id="hudLevel">1</b></span><div class="bar"><i id="barXp" style="width:0%"></i></div><b id="hudXp">0/100</b></div>
+  </div>
+  <div id="msg" role="status"></div>
+
+  <div id="view-home" class="view"></div>
+  <div id="view-world" class="view"></div>
+  <div id="view-work" class="view"></div>
+  <div id="view-farm" class="view"></div>
+  <div id="view-inventory" class="view"></div>
+  <div id="view-pet" class="view"></div>
+  <div id="view-radio" class="view"></div>
+  <div id="view-character" class="view"></div>
+  <div id="view-clan" class="view"></div>
+
+  <nav id="tabbar" aria-label="Game tabs"></nav>
+</div>
+
+<div id="watchOverlay" class="hidden" style="position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px">
+  <div id="watchFace" style="width:300px;height:300px;border-radius:50%;border:6px solid var(--amber);background:#0b0f1a;color:#ece8db;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px;box-shadow:0 0 0 10px #1a2338">
+    <div id="watchTime" style="font-size:30px;font-weight:700">--:--</div>
+    <div id="watchDayNight" class="small" style="color:#ffd97a">Night</div>
+    <div id="watchStats" style="font-size:12px;line-height:1.6;margin-top:8px"></div>
+    <div id="watchEmotion" style="font-size:12px;margin-top:6px"></div>
+    <div id="watchLocation" style="font-size:12px;margin-top:4px"></div>
+  </div>
+  <button class="btn2" id="watchClose" type="button" style="margin-top:18px">Close watch</button>
+</div>
+
+<script>
+/* ================= VINTAGE_PLAYLIST: patch this array to change Station 01 ================= */
+var VINTAGE_PLAYLIST = [
+  { title: "Ladies On The Steamboat", artist: "1920s dance band", url: "https://archive.org/download/LadiesOnTheSteamboat/Ladies%20On%20The%20Steamboat.mp3" },
+  { title: "Doo Wacka Doo", artist: "Paul Whiteman Orchestra", url: "https://archive.org/download/PaulWhitemanHisOrchestraDooWackaDoo/PaulWhitemanHisOrchestra-DooWackaDoo.mp3" },
+  { title: "Swing Low, Sweet Chariot", artist: "The Southern Four (1921)", url: "https://archive.org/download/TheSouthernFourSwingLowSweetChariot/TheSouthernFour-SwingLowSweetChariot.mp3" },
+  { title: "Wildwood Flower", artist: "The Carter Family (1928)", url: "https://archive.org/download/TheCarterFamilyWildwoodFlower/TheCarterFamily-WildwoodFlower.mp3" },
+  { title: "Nobody Knows The Way I Feel This Morning", artist: "Alberta Hunter (1921)", url: "https://archive.org/download/AlbertaJohnson-NobodyKnowsTheWayIFeelThisMorning/AlbertaJohnson-NobodyKnowsTheWayIFeelThisMorning.mp3" },
+  { title: "Stealin, Stealin", artist: "Memphis Jug Band (1928)", url: "https://archive.org/download/MemphisJugBand-StealinStealin/MemphisJugBand-StealinStealin.mp3" },
+  { title: "Bad Luck Blues", artist: "Blind Lemon Jefferson", url: "https://archive.org/download/Blind_Lemon_Jefferson_Bad_Luck_Blues/Blind_Lemon_Jefferson_Bad_Luck_Blues.mp3" },
+  { title: "When The Levee Breaks", artist: "Kansas Joe McCoy and Memphis Minnie (1929)", url: "https://archive.org/download/Kansas_Joe_Memphis_Minnie-When_Levee_Breaks/Kansas_Joe_and_Memphis_Minnie-When_the_Levee_Breaks.mp3" }
+];
+/* ================= end of VINTAGE_PLAYLIST ================= */
+
+var SAVE_KEY = "stars-save-v1";
+var TEST_SAVE_KEY = "stars-test-save-v1";
+var activeKey = SAVE_KEY;
+var isTestMode = false;
+var SKINS = ["#f2c9a0", "#e0aa72", "#c68850", "#8a5a32", "#5d3a20"];
+var HAIR_STYLES = ["Short", "Long", "Buzz", "Curly", "Ponytail", "Bald"];
+var HAIR_COLORS = ["#2b2118", "#6b3a1e", "#c9a227", "#b0b0b0", "#a31627"];
+var JACKETS = ["#3a5a8c", "#7a2e2e", "#2e6b46", "#8c6a2e", "#4a4a55", "#1e6f7a"];
+var DOG_COATS = [
+  { name: "Brown", c: "#8a5a32", spot: "#6b4423" },
+  { name: "Black", c: "#2b2b2b", spot: "#1c1c1c" },
+  { name: "White", c: "#e8e4da", spot: "#cfc9b8" },
+  { name: "Spotted", c: "#e8e4da", spot: "#8a5a32" }
+];
+var JOBS = {
+  scavenger: { name: "Scavenger", base: { str: 6, agi: 7, end: 6, int: 5, cha: 5 }, pay: 45, shift: "Salvage crew", ability: "Keen Eyes", abilityText: "Plus 1 loot roll on every scavenging run.", items: { canned_beans: 2, water_bottle: 2, knife: 1, scrap: 3 } },
+  farmer: { name: "Farmer", base: { str: 5, agi: 5, end: 7, int: 7, cha: 5 }, pay: 40, shift: "Field hand", ability: "Green Thumb", abilityText: "Plus 1 crop on every harvest.", items: { seed_greens: 3, seed_grain: 2, water_bottle: 2, canned_beans: 1 } },
+  medic: { name: "Medic", base: { str: 5, agi: 6, end: 5, int: 8, cha: 5 }, pay: 55, shift: "Clinic aide", ability: "Field Care", abilityText: "Healing items restore 25 percent more. Clinic healing costs 25 percent less.", items: { bandage: 3, medkit: 1, water_bottle: 2 } },
+  guard: { name: "Guard", base: { str: 8, agi: 6, end: 7, int: 4, cha: 4 }, pay: 50, shift: "Gate watch", ability: "Watchful", abilityText: "If you collapse, you lose only 7 percent of your caps instead of 15 percent.", items: { knife: 1, canned_beans: 2, water_bottle: 2, cloth: 2 } },
+  trader: { name: "Trader", base: { str: 5, agi: 5, end: 5, int: 6, cha: 8 }, pay: 60, shift: "Market stall", ability: "Bargainer", abilityText: "Buy prices 10 percent lower, sell prices 10 percent higher.", items: { scrap: 5, cloth: 2, canned_beans: 1, water_bottle: 1 } },
+  mechanic: { name: "Mechanic", base: { str: 7, agi: 5, end: 6, int: 7, cha: 4 }, pay: 55, shift: "Workshop repair", ability: "Tinkerer", abilityText: "Crafting uses 1 fewer material per ingredient. Room upgrades cost 10 percent less.", items: { wrench: 1, scrap: 5, cloth: 1, water_bottle: 1 } }
+};
+var ITEMS = {
+  canned_beans: { name: "Canned beans", cat: "Food", price: 18, use: { hunger: 30, energy: 5 } },
+  dried_meat: { name: "Dried meat", cat: "Food", price: 24, use: { hunger: 25, morale: 5, energy: 5 } },
+  greens_crop: { name: "Fresh greens", cat: "Food", price: 8, use: { hunger: 15 } },
+  grain_crop: { name: "Grain", cat: "Food", price: 10, use: { hunger: 12, energy: 5 } },
+  roots_crop: { name: "Root vegetables", cat: "Food", price: 14, use: { hunger: 25 } },
+  stew: { name: "Hearty stew", cat: "Food", price: 40, use: { hunger: 45, energy: 15, morale: 5 } },
+  water_bottle: { name: "Water bottle", cat: "Drink", price: 10, use: { thirst: 35 } },
+  bandage: { name: "Bandage", cat: "Medicine", price: 22, use: { health: 25 } },
+  medkit: { name: "Medkit", cat: "Medicine", price: 60, use: { health: 60 } },
+  scrap: { name: "Scrap metal", cat: "Material", price: 4 },
+  cloth: { name: "Cloth", cat: "Material", price: 6 },
+  wood: { name: "Wood", cat: "Material", price: 5 },
+  herb: { name: "Herbs", cat: "Material", price: 8 },
+  seed_greens: { name: "Greens seeds", cat: "Seed", price: 6 },
+  seed_grain: { name: "Grain seeds", cat: "Seed", price: 10 },
+  seed_roots: { name: "Root seeds", cat: "Seed", price: 14 },
+  wrench: { name: "Pipe wrench", cat: "Tool", price: 70, equip: "tool" },
+  knife: { name: "Rusty knife", cat: "Weapon", price: 90, equip: "weapon" },
+  rifle: { name: "Hunting rifle", cat: "Weapon", price: 300, equip: "weapon" },
+  watch: { name: "Gold watch", cat: "Valuable", price: 120 }
+};
+var CROPS = {
+  greens: { name: "Fast greens", seed: "seed_greens", out: "greens_crop", hours: 2 },
+  grain: { name: "Grain", seed: "seed_grain", out: "grain_crop", hours: 8 },
+  roots: { name: "Root vegetables", seed: "seed_roots", out: "roots_crop", hours: 24 }
+};
+var ODD_JOBS = [
+  { id: "rubble", name: "Clear rubble", pay: 20, xp: 12, energy: 10, cooldownMin: 60 },
+  { id: "messages", name: "Run messages", pay: 15, xp: 10, energy: 8, cooldownMin: 45 },
+  { id: "fence", name: "Repair a fence", pay: 30, xp: 18, energy: 12, cooldownMin: 120 },
+  { id: "salvage", name: "Sort salvage", pay: 12, xp: 8, energy: 6, cooldownMin: 30 }
+];
+var LOOT = [
+  ["scrap", 30], ["cloth", 20], ["wood", 15], ["canned_beans", 12], ["water_bottle", 12],
+  ["herb", 8], ["dried_meat", 6], ["bandage", 5], ["seed_greens", 6], ["seed_grain", 4],
+  ["seed_roots", 3], ["knife", 2], ["watch", 2], ["medkit", 2], ["rifle", 1]
+];
+var WASTELAND_BULLETINS = [
+  { title: "Traders report the north road is passable again after the spring washout", time: "Morning bulletin" },
+  { title: "The clinic asks settlers to boil all river water before drinking", time: "Morning bulletin" },
+  { title: "A new seed store opens at the market yard this week", time: "Midday bulletin" },
+  { title: "Night patrols warn of wild dogs near the old ruins, travel in pairs", time: "Evening bulletin" },
+  { title: "The radio tower crew needs scrap metal and cloth, fair caps paid", time: "Evening bulletin" }
+];
+var INTRO_LINES = [
+  "The flu took the world in a single season.",
+  "Cities went quiet. The roads emptied. The lights went out, one town at a time.",
+  "You learned to live on what you could carry, and what you could grow.",
+  "Nights are long now, and the sky is the clearest it has ever been.",
+  "Every evening, just after dark, you turn the old radio dial.",
+  "Most nights there is only static. But sometimes, through the static, there is music.",
+  "And once, faint and far away, a voice said a single word: alive.",
+  "So you keep the fire lit. You keep the dog close. You keep walking toward the signal.",
+  "This is your story now. The stars are still up there. So are you."
+];
+var S = null;
+var currentTab = "home";
+var marketFilter = "All";
+var invFilter = "All";
+var introState = { idx: 0, pos: 0, timer: null, done: false, reduced: false, returnTo: "creator" };
+var radioState = { station: 1, track: 0, playing: false, volume: 0.8, failed: 0 };
+var sirenNodes = null;
+
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function todayStr(d) { d = d || new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+function fmtTime(ms) { var s = Math.floor(ms / 1000); if (s < 60) return s + "s"; var m = Math.floor(s / 60); if (m < 60) return m + "m"; var h = Math.floor(m / 60); if (h < 24) return h + "h " + (m % 60) + "m"; return Math.floor(h / 24) + "d " + (h % 24) + "h"; }
+function showMsg(t) { var el = $("msg"); el.textContent = t; el.classList.add("show"); clearTimeout(showMsg._t); showMsg._t = setTimeout(function () { el.classList.remove("show"); }, 6000); }
+function save() { if (!S) return; S.lastSeen = Date.now(); try { localStorage.setItem(activeKey, JSON.stringify(S)); } catch (e) {} }
+function loadSave(key) { try { var raw = localStorage.getItem(key || SAVE_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
+function xpNeeded(level) { return 100 * level; }
+function capacity() { return 20 + (S.rooms.storage * 10) + shedBonus() + vehicleBonus().capacity + (S.attrs.str >= 10 ? 10 : 0); }
+function invCount() { var n = 0; Object.keys(S.inventory).forEach(function (k) { n += S.inventory[k]; }); return n; }
+function chestCount() { var n = 0; Object.keys(S.chest).forEach(function (k) { n += S.chest[k]; }); return n; }
+function chestCapacity() { return 40 + (S.rooms.storage * 20); }
+function plotCount() { return 4 + S.rooms.workshop + greenhouseBonus(); }
+function payMult() { var m = 1 + 0.05 * S.attrs.cha + 0.05 * (S.level - 1); if (S.attrs.cha >= 10) m += 0.10; var st = (S.emotions ? S.emotions.stress : 0); m *= (1 - st / 400); return m; }
+function jobOf() { return JOBS[S.job]; }
+function hasAbility(name) {
+  if (jobOf().ability === name) return true;
+  if (name === "Heavy Lifter") return S.attrs.str >= 10;
+  if (name === "Quick Hands") return S.attrs.agi >= 10;
+  if (name === "Sharp Mind") return S.attrs.int >= 10;
+  if (name === "Silver Tongue") return S.attrs.cha >= 10;
+  return false;
+}
+function buyPrice(id) { var p = ITEMS[id].price; if (S.job === "trader") p = Math.round(p * 0.9); return p; }
+function sellPrice(id) { var p = Math.floor(ITEMS[id].price / 2); if (S.job === "trader") p = Math.round(p * 1.1); return p; }
+function addItem(id, qty) {
+  if (invCount() + qty > capacity()) return false;
+  S.inventory[id] = (S.inventory[id] || 0) + qty;
+  return true;
+}
+function gainXp(n) {
+  S.xp += n;
+  while (S.xp >= xpNeeded(S.level)) { S.xp -= xpNeeded(S.level); S.level += 1; S.points += 1; showMsg("Level up! You reached level " + S.level + " and gained 1 attribute point. Spend it on the Character tab."); }
+}
+function dayNumber() {
+  var start = new Date(S.day0 + "T00:00:00");
+  var now = new Date(todayStr() + "T00:00:00");
+  return Math.floor((now - start) / 86400000) + 1;
+}
+function applyDecay(hours) {
+  if (hours <= 0) return;
+  var info = weatherInfo();
+  var hm = 1, tm = 1;
+  if (info.hot) tm = 1.5;
+  if (info.cold) hm = 1.5;
+  tm *= (1 - 0.15 * watertankTier());
+  if (S.currentSite === "Home Base") { hm = 1 + (hm - 1) / 2; tm = 1 + (tm - 1) / 2; }
+  S.stats.hunger = clamp(S.stats.hunger - 2.5 * hm * hours, 0, 100);
+  S.stats.thirst = clamp(S.stats.thirst - 3.5 * tm * hours, 0, 100);
+  S.stats.energy = clamp(S.stats.energy - 2 * hours, 0, 100);
+  S.stats.morale = clamp(S.stats.morale - 0.5 * hours, 0, 100);
+  if (S.pet.adopted) S.pet.hunger = clamp(S.pet.hunger - 2 * hours, 0, 100);
+  if (S.stats.hunger <= 0) S.stats.health = clamp(S.stats.health - 4 * hours, 0, 100);
+  if (S.stats.thirst <= 0) S.stats.health = clamp(S.stats.thirst - 4 * hours, 0, 100);
+  if (S.ailments && S.ailments.length) S.stats.health = clamp(S.stats.health - 2 * S.ailments.length * hours, 0, 100);
+  if (S.emotions && (S.stats.health < 30 || S.stats.hunger < 30 || S.stats.thirst < 30)) bumpEmotion("stress", 3, "Low health, hunger, or thirst raised stress.");
+  if (S.stats.health <= 0) collapse();
+}
+function collapse() {
+  var pct = (S.job === "guard") ? 0.07 : 0.15;
+  var lost = Math.floor(S.caps * pct);
+  S.caps -= lost;
+  var keys = Object.keys(S.inventory).filter(function (k) { return S.inventory[k] > 0 && S.equipped.tool !== k && S.equipped.weapon !== k; });
+  var lostItem = "";
+  if (keys.length) { var k = keys[Math.floor(Math.random() * keys.length)]; S.inventory[k] -= 1; if (S.inventory[k] <= 0) delete S.inventory[k]; lostItem = " You lost 1 " + ITEMS[k].name + "."; }
+  S.stats.health = 40; S.stats.hunger = 30; S.stats.thirst = 30; S.stats.energy = 50; S.stats.morale = clamp(S.stats.morale - 10, 0, 100);
+  showMsg("You collapsed from exhaustion and woke up at home. No one dies for good here. You lost " + lost + " caps." + lostItem);
+}
+function hairPath(style) {
+  if (style === "Short") return "M52 34 Q52 14 78 14 Q104 14 104 34 Q104 26 96 24 Q88 16 78 16 Q68 16 60 24 Q56 26 52 34 Z";
+  if (style === "Long") return "M50 40 Q46 10 78 10 Q110 10 106 40 L108 78 L96 78 L98 40 Q96 24 78 24 Q60 24 58 40 L60 78 L48 78 Z";
+  if (style === "Buzz") return "M54 34 Q54 18 78 18 Q102 18 102 34 Q100 26 78 26 Q56 26 54 34 Z";
+  if (style === "Curly") return "M52 36 Q44 22 56 16 Q52 8 66 10 Q70 2 82 6 Q94 2 98 12 Q110 14 104 26 Q110 34 100 36 Q96 28 78 28 Q60 28 52 36 Z";
+  if (style === "Ponytail") return "M54 34 Q54 16 78 16 Q102 16 102 34 Q102 28 96 26 L108 52 Q110 60 102 60 Q96 60 96 52 L94 30 Q88 22 78 22 Q68 22 62 30 L60 34 Z";
+  return "";
+}
+function avatarSVG(a) {
+  var skin = SKINS[a.skin], hc = HAIR_COLORS[a.hairColor], jc = JACKETS[a.jacket];
+  var hair = hairPath(HAIR_STYLES[a.hair]);
+  return '<svg viewBox="0 0 160 160" width="120" height="120" role="img" aria-label="Survivor avatar">'
+    + '<rect x="42" y="96" width="76" height="56" rx="14" fill="' + jc + '"/>'
+    + '<rect x="70" y="88" width="20" height="18" fill="' + skin + '"/>'
+    + '<ellipse cx="80" cy="58" rx="28" ry="32" fill="' + skin + '"/>'
+    + (hair ? '<path d="' + hair + '" fill="' + hc + '"/>' : "")
+    + '<circle cx="70" cy="58" r="3" fill="#1c1c1c"/><circle cx="90" cy="58" r="3" fill="#1c1c1c"/>'
+    + '<path d="M72 72 Q80 77 88 72" stroke="#1c1c1c" stroke-width="2" fill="none" stroke-linecap="round"/>'
+    + '<rect x="52" y="104" width="56" height="6" fill="rgba(0,0,0,.25)"/>'
+    + "</svg>";
+}
+function dogSVG(coat) {
+  var c = coat.c, s = coat.spot;
+  return '<svg viewBox="0 0 160 120" width="130" height="98" role="img" aria-label="Dog companion">'
+    + '<ellipse cx="80" cy="88" rx="52" ry="22" fill="' + c + '"/>'
+    + '<ellipse cx="118" cy="52" rx="10" ry="18" fill="' + c + '" transform="rotate(20 118 52)"/>'
+    + '<ellipse cx="52" cy="52" rx="10" ry="18" fill="' + c + '" transform="rotate(-20 52 52)"/>'
+    + '<circle cx="85" cy="52" r="26" fill="' + c + '"/>'
+    + '<ellipse cx="96" cy="44" rx="10" ry="7" fill="' + s + '"/>'
+    + '<circle cx="76" cy="50" r="3" fill="#141414"/><circle cx="94" cy="50" r="3" fill="#141414"/>'
+    + '<ellipse cx="85" cy="62" rx="7" ry="5" fill="#141414"/>'
+    + '<path d="M28 84 Q10 78 8 62" stroke="' + c + '" stroke-width="7" fill="none" stroke-linecap="round"/>'
+    + '<rect x="52" y="102" width="10" height="12" rx="4" fill="' + c + '"/><rect x="104" y="102" width="10" height="12" rx="4" fill="' + c + '"/>'
+    + "</svg>";
+}
+function icon(name) {
+  var p = {
+    home: '<path d="M4 12 L12 4 L20 12 M6 10 V20 H18 V10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+    world: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 12 H20 M12 4 Q16 12 12 20 Q8 12 12 4" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    work: '<path d="M14 4 L20 10 L11 19 L5 13 Z M13 9 L17 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+    farm: '<path d="M12 21 V9 M12 9 Q12 3 18 3 Q18 9 12 9 M12 13 Q12 7 6 7 Q6 13 12 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    bag: '<path d="M5 8 H19 L18 20 H6 Z M9 8 Q9 3 12 3 Q15 3 15 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+    pet: '<circle cx="12" cy="14" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="7" cy="9" r="1.8" fill="currentColor"/><circle cx="12" cy="7" r="1.8" fill="currentColor"/><circle cx="17" cy="9" r="1.8" fill="currentColor"/>',
+    radio: '<rect x="3" y="7" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="13" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M13 11 H19 M13 15 H19" stroke="currentColor" stroke-width="1.5"/><path d="M17 3 L20 6 M7 3 L4 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    person: '<circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 20 Q4 14 12 14 Q20 14 20 20" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+    clan: '<path d="M3 21 V10 L12 3 L21 10 V21" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 21 V13 H16 V21" fill="none" stroke="currentColor" stroke-width="1.8"/>'
+  };
+  return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (p[name] || p.home) + "</svg>";
+}
+
+/* ================= game shell, creator, HUD ================= */
+var TABS = [
+  { id: "home", name: "Home", icon: "home" },
+  { id: "world", name: "World", icon: "world" },
+  { id: "work", name: "Work", icon: "work" },
+  { id: "farm", name: "Farm", icon: "farm" },
+  { id: "inventory", name: "Inventory", icon: "bag" },
+  { id: "pet", name: "Pet", icon: "pet" },
+  { id: "radio", name: "Radio", icon: "radio" },
+  { id: "character", name: "Character", icon: "person" },
+  { id: "clan", name: "Clan", icon: "clan" }
+];
+function buildTabbar() {
+  $("tabbar").innerHTML = TABS.map(function (t) {
+    return '<button type="button" data-tab="' + t.id + '" class="' + (currentTab === t.id ? "on" : "") + '">' + icon(t.icon) + "<span>" + t.name + "</span></button>";
+  }).join("");
+  Array.prototype.forEach.call($("tabbar").querySelectorAll("button"), function (b) {
+    b.addEventListener("click", function () { switchTab(b.getAttribute("data-tab")); });
+  });
+}
+function switchTab(id) {
+  currentTab = id;
+  var siteMap = { home: "Home Base", farm: "Farm Fields", work: "Work Yard", radio: "Radio Tower" };
+  if (S && siteMap[id]) S.currentSite = siteMap[id];
+  if (S) save();
+  TABS.forEach(function (t) { var v = $("view-" + t.id); if (v) v.classList.toggle("on", t.id === id); });
+  buildTabbar();
+  renderAll();
+}
+function updateHud() {
+  if (!S) return;
+  $("hudName").textContent = S.name;
+  $("hudCity").textContent = S.city + ", " + S.country;
+  $("dayPill").textContent = "Day " + dayNumber();
+  var st = S.stats;
+  [["Health", "barHealth", "numHealth"], ["Hunger", "barHunger", "numHunger"], ["Thirst", "barThirst", "numThirst"], ["Energy", "barEnergy", "numEnergy"], ["Morale", "barMorale", "numMorale"]].forEach(function (row) {
+    var key = row[0].toLowerCase();
+    $(row[1]).style.width = st[key] + "%";
+    $(row[2]).textContent = Math.round(st[key]);
+  });
+  $("hudCaps").textContent = S.caps;
+  $("hudLevel").textContent = S.level;
+  $("hudXp").textContent = S.xp + "/" + xpNeeded(S.level);
+  $("barXp").style.width = Math.min(100, Math.round(S.xp / xpNeeded(S.level) * 100)) + "%";
+  var now = new Date();
+  $("clock").textContent = ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2);
+}
+function checkBuildings() {
+  var done = false;
+  Object.keys(S.buildings).forEach(function (k) {
+    var b = S.buildings[k];
+    if (b.state === "building" && Date.now() >= b.doneAt) { b.state = "built"; b.tier = 1; done = k; }
+  });
+  if (done) { showMsg("Construction finished: " + BUILDINGS[done].name + " is ready."); save(); }
+}
+function renderAll() {
+  if (!S) return;
+  checkBuildings();
+  updateHud();
+  renderHome(); renderWorld(); renderWork(); renderFarm(); renderInventory(); renderPet(); renderRadio(); renderCharacter(); renderClan(); applyDayNight();
+}
+function roomCost(room) { var base = 60 * (S.rooms[room] + 1); if (S.job === "mechanic") base = Math.round(base * 0.9); return base; }
+function upgradeRoom(room) {
+  var cost = roomCost(room);
+  if (S.rooms[room] >= 3) { showMsg("That room is already at max level."); return; }
+  if (S.caps < cost) { showMsg("Not enough caps. You need " + cost + " caps."); return; }
+  S.caps -= cost; S.rooms[room] += 1;
+  if (room === "workshop") { var pc = plotCount(); while (S.farm.length < pc) S.farm.push({ crop: null, plantedAt: 0, watered: false }); }
+  showMsg("Room upgraded: " + room + " is now level " + S.rooms[room] + ".");
+  save(); renderAll();
+}
+function doRest() {
+  var now = Date.now();
+  if (now - S.lastRest < 600000) { showMsg("You need to wait " + fmtTime(600000 - (now - S.lastRest)) + " before resting again."); return; }
+  S.lastRest = now;
+  var gain = 35 + (S.rooms.bed * 15);
+  S.stats.energy = clamp(S.stats.energy + gain, 0, 100);
+  S.stats.hunger = clamp(S.stats.hunger - 5, 0, 100);
+  S.stats.thirst = clamp(S.stats.thirst - 5, 0, 100);
+  if (S.emotions) S.stats.morale = clamp(S.stats.morale + Math.floor(S.emotions.hope / 20), 0, 100);
+  if (S.healthDetail) S.healthDetail.sleep = clamp(S.healthDetail.sleep + 6, 0, 100);
+  bumpEmotion("contentment", 8, "Resting at home raised contentment.");
+  showMsg("You rested and recovered " + gain + " energy. Rest costs a little hunger and thirst.");
+  save(); renderAll();
+}
+
+/* ================= creator ================= */
+var creator = { skin: 0, hair: 0, hairColor: 0, jacket: 0, job: "scavenger", attrs: null, points: 5, city: "", country: "", lat: null, lon: null };
+function creatorAttrs() { if (!creator.attrs) creator.attrs = Object.assign({}, JOBS[creator.job].base); return creator.attrs; }
+function renderCreator() {
+  $("avatarPreview").innerHTML = avatarSVG(creator);
+  function opts(el, list, cur, key, fmt) {
+    $(el).innerHTML = list.map(function (v, i) {
+      return '<button type="button" class="optbtn' + (i === cur ? " sel" : "") + '" data-i="' + i + '">' + (fmt ? fmt(v) : v) + "</button>";
+    }).join("");
+    Array.prototype.forEach.call($(el).querySelectorAll("button"), function (b) {
+      b.addEventListener("click", function () { creator[key] = parseInt(b.getAttribute("data-i"), 10); renderCreator(); });
+    });
+  }
+  opts("skinRow", SKINS, creator.skin, "skin", function (v) { return '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:' + v + '"></span>'; });
+  opts("hairRow", HAIR_STYLES, creator.hair, "hair");
+  opts("hairColorRow", HAIR_COLORS, creator.hairColor, "hairColor", function (v) { return '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:' + v + '"></span>'; });
+  opts("jacketRow", JACKETS, creator.jacket, "jacket", function (v) { return '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:' + v + '"></span>'; });
+  $("jobList").innerHTML = Object.keys(JOBS).map(function (k) {
+    var j = JOBS[k];
+    var items = Object.keys(j.items).map(function (id) { return ITEMS[id].name + " x" + j.items[id]; }).join(", ");
+    return '<button type="button" class="jobcard' + (creator.job === k ? " sel" : "") + '" data-job="' + k + '"><b>' + j.name + "</b> <span class=\"small\">Shift: " + j.shift + ", base pay " + j.pay + " caps</span><br><span class=\"small\">Skills: STR " + j.base.str + " AGI " + j.base.agi + " END " + j.base.end + " INT " + j.base.int + " CHA " + j.base.cha + "<br>Ability: " + j.ability + ", " + j.abilityText + "<br>Starts with: " + items + "</span></button>";
+  }).join("");
+  Array.prototype.forEach.call($("jobList").querySelectorAll("button"), function (b) {
+    b.addEventListener("click", function () { creator.job = b.getAttribute("data-job"); creator.attrs = null; creator.points = 5; renderCreator(); });
+  });
+  var a = creatorAttrs();
+  $("pointsLeft").textContent = creator.points;
+  var names = { str: "Strength", agi: "Agility", end: "Endurance", int: "Intellect", cha: "Charisma" };
+  $("attrList").innerHTML = Object.keys(names).map(function (k) {
+    return '<div class="attrrow"><span>' + names[k] + '</span><button type="button" data-k="' + k + '" data-d="-1">-</button><b>' + a[k] + '</b><button type="button" data-k="' + k + '" data-d="1">+</button></div>';
+  }).join("");
+  Array.prototype.forEach.call($("attrList").querySelectorAll("button"), function (b) {
+    b.addEventListener("click", function () {
+      var k = b.getAttribute("data-k"), d = parseInt(b.getAttribute("data-d"), 10);
+      var base = JOBS[creator.job].base[k];
+      if (d === 1 && creator.points > 0) { a[k] += 1; creator.points -= 1; }
+      if (d === -1 && a[k] > base) { a[k] -= 1; creator.points += 1; }
+      renderCreator();
+    });
+  });
+}
+function useMyCity() {
+  var st = $("geoStatus");
+  if (!navigator.geolocation) { st.textContent = "This browser does not offer location. Type your city below instead."; return; }
+  st.textContent = "Asking for your location...";
+  navigator.geolocation.getCurrentPosition(function (pos) {
+    var lat = pos.coords.latitude, lon = pos.coords.longitude;
+    fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + lat + "&longitude=" + lon + "&localityLanguage=en")
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var city = d.city || d.locality || "";
+        var country = d.countryName || "";
+        if (!city) throw new Error("no city");
+        $("cCity").value = city; $("cCountry").value = country;
+        return fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=1");
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.results && d.results[0]) { creator.lat = Math.round(d.results[0].latitude * 100) / 100; creator.lon = Math.round(d.results[0].longitude * 100) / 100; }
+        st.textContent = "City set from your location. Only the city name is saved, never your exact position.";
+      })
+      .catch(function () { st.textContent = "Could not read a city name from your location. Type your city below instead."; });
+  }, function () { st.textContent = "Location permission was not given. Type your city below instead."; });
+}
+function lookupCityCoords(city, cb) {
+  fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=1")
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.results && d.results[0]) cb(Math.round(d.results[0].latitude * 100) / 100, Math.round(d.results[0].longitude * 100) / 100);
+      else cb(null, null);
+    })
+    .catch(function () { cb(null, null); });
+}
+function startGame() {
+  var name = $("cName").value.trim();
+  var city = $("cCity").value.trim();
+  var country = $("cCountry").value.trim();
+  var base = $("cBase").value.trim();
+  var err = $("createError");
+  if (!name) { err.textContent = "Give your survivor a name first."; return; }
+  if (!city) { err.textContent = "Enter a city, or tap Use my city."; return; }
+  if (!base) { err.textContent = "Name your home base first."; return; }
+  err.textContent = "";
+  var job = JOBS[creator.job];
+  var inv = {};
+  Object.keys(job.items).forEach(function (k) { inv[k] = job.items[k]; });
+  var farm = [];
+  for (var i = 0; i < 4; i++) farm.push({ crop: null, plantedAt: 0, watered: false });
+  var finish = function (lat, lon) {
+    S = {
+      name: name, job: creator.job, attrs: Object.assign({}, creatorAttrs()), points: creator.points,
+      appearance: { skin: creator.skin, hair: creator.hair, hairColor: creator.hairColor, jacket: creator.jacket },
+      city: city, country: country, baseName: base, lat: lat, lon: lon,
+      level: 1, xp: 0, caps: 30, day0: todayStr(),
+      stats: { health: 100, hunger: 85, thirst: 85, energy: 90, morale: 70 },
+      inventory: inv, equipped: { tool: null, weapon: null }, chest: {},
+      rooms: { bed: 0, storage: 0, kitchen: 0, workshop: 0 },
+      farm: farm, lastSeen: Date.now(), lastShiftDate: "", lastRest: 0, oddCooldowns: {},
+      pet: { adopted: false, name: "", coat: 0, hunger: 80, loyalty: 20, training: 0 },
+      weapons: [], armor: [], vehicles: [], activeVehicle: null,
+      buildings: {
+        greenhouse: { state: "none", tier: 0, doneAt: 0 },
+        watchtower: { state: "none", tier: 0, doneAt: 0 },
+        garage: { state: "none", tier: 0, doneAt: 0 },
+        watertank: { state: "none", tier: 0, doneAt: 0 },
+        shed: { state: "none", tier: 0, doneAt: 0 }
+      },
+      radioBoostDate: "", lastScavenge: 0, weather: null, weatherAt: 0
+    };
+    activeKey = SAVE_KEY; isTestMode = false;
+    normalizeSave();
+    save();
+    $("creator").classList.add("hidden");
+    $("game").classList.remove("hidden");
+    buildTabbar();
+    switchTab("home");
+    fetchWeather(true);
+    showMsg("Welcome to " + city + ", " + name + ". Your story starts now.");
+  };
+  if (creator.lat !== null && creator.lon !== null) finish(creator.lat, creator.lon);
+  else lookupCityCoords(city, function (lat, lon) { finish(lat, lon); });
+}
+function normalizeSave() {
+  if (!S.weapons) S.weapons = [];
+  if (!S.armor) S.armor = [];
+  if (!S.vehicles) S.vehicles = [];
+  if (S.activeVehicle === undefined) S.activeVehicle = null;
+  if (!S.buildings) S.buildings = { greenhouse: { state: "none", tier: 0, doneAt: 0 }, watchtower: { state: "none", tier: 0, doneAt: 0 }, garage: { state: "none", tier: 0, doneAt: 0 }, watertank: { state: "none", tier: 0, doneAt: 0 }, shed: { state: "none", tier: 0, doneAt: 0 } };
+  if (!S.equipped) S.equipped = { tool: null, weapon: null };
+  if (S.lastScavenge === undefined) S.lastScavenge = 0;
+  if (!S.emotions) S.emotions = { hope: 50, stress: 20, loneliness: 20, contentment: 50 };
+  if (!S.emotionLog) S.emotionLog = [];
+  if (!S.healthDetail) S.healthDetail = { fitness: 30, sleep: 60, nutrition: 50 };
+  if (!S.ailments) S.ailments = [];
+  if (!S.eatenToday) S.eatenToday = { date: todayStr(), types: [] };
+  if (!S.socialToday) S.socialToday = { date: todayStr(), pet: false, visit: false };
+  if (!S.clan) S.clan = null;
+  if (!S.currentSite) S.currentSite = "Home Base";
+  if (S.weather === undefined) S.weather = null;
+  if (S.weatherAt === undefined) S.weatherAt = 0;
+  if (S.radioBoostDate === undefined) S.radioBoostDate = "";
+  if (!S.oddCooldowns) S.oddCooldowns = {};
+  if (!S.rooms) S.rooms = { bed: 0, storage: 0, kitchen: 0, workshop: 0 };
+  if (!S.farm) S.farm = [];
+  var pc = 4 + (S.rooms.workshop || 0) + greenhouseBonus();
+  while (S.farm.length < pc) S.farm.push({ crop: null, plantedAt: 0, watered: false });
+}
+function greenhouseBonus() { var b = S.buildings.greenhouse; return (b && b.state === "built") ? b.tier * 2 : 0; }
+function watchtowerTier() { var b = S.buildings.watchtower; return (b && b.state === "built") ? b.tier : 0; }
+function garageBuilt() { var b = S.buildings.garage; return !!(b && b.state === "built"); }
+function watertankTier() { var b = S.buildings.watertank; return (b && b.state === "built") ? b.tier : 0; }
+function shedBonus() { var b = S.buildings.shed; return (b && b.state === "built") ? b.tier * 15 : 0; }
+function activeVehicleObj() { if (!S.activeVehicle) return null; var v = null; S.vehicles.forEach(function (x) { if (x.key === S.activeVehicle) v = x; }); return v; }
+function vehicleBonus() {
+  var v = activeVehicleObj();
+  if (!v || v.condition <= 0) return { rolls: 0, capacity: 0, cooldownCut: 0 };
+  if (v.fuelNeeded && v.fuel <= 0) return { rolls: 0, capacity: 0, cooldownCut: 0 };
+  return VEHICLES[v.key].bonus;
+}
+
+/* ================= gear, buildings, vehicles ================= */
+var BUILDINGS = {
+  greenhouse: { name: "Greenhouse", desc: "Adds farm plots.", cost: { caps: 80, scrap: 4, cloth: 2 }, minutes: 5 },
+  watchtower: { name: "Watchtower", desc: "Guard pay up 15 percent per tier. Scavenge injury chance down 3 percent per tier.", cost: { caps: 150, scrap: 8, wood: 4 }, minutes: 10 },
+  garage: { name: "Garage", desc: "Unlocks vehicles.", cost: { caps: 120, scrap: 10, wood: 4 }, minutes: 10 },
+  watertank: { name: "Water Tank", desc: "Thirst decays 15 percent slower per tier.", cost: { caps: 90, scrap: 4, wood: 2 }, minutes: 5 },
+  shed: { name: "Storage Shed", desc: "Carry capacity up 15 per tier.", cost: { caps: 70, scrap: 6, wood: 4 }, minutes: 5 }
+};
+var WEAPONS = {
+  knife: { name: "Makeshift knife", dmg: 5, dur: 30, cost: { caps: 20, scrap: 2, wood: 1 } },
+  baton: { name: "Wooden baton", dmg: 7, dur: 40, cost: { caps: 30, wood: 3 } },
+  bow: { name: "Bow", dmg: 12, dur: 35, cost: { caps: 60, wood: 3, cloth: 2 } },
+  blade: { name: "Reinforced blade", dmg: 18, dur: 50, cost: { caps: 120, scrap: 6, cloth: 2 } },
+  rifle: { name: "Hunting rifle", dmg: 28, dur: 40, cost: { caps: 250, scrap: 8, wood: 4 } }
+};
+var ARMOR = {
+  jacket: { name: "Patched jacket", def: 3, dur: 40, cost: { caps: 25, cloth: 4 } },
+  vest: { name: "Leather vest", def: 6, dur: 50, cost: { caps: 60, cloth: 6, scrap: 2 } },
+  plate: { name: "Scrap plate", def: 10, dur: 60, cost: { caps: 130, scrap: 8, cloth: 2 } },
+  coat: { name: "Reinforced coat", def: 15, dur: 70, cost: { caps: 240, scrap: 6, cloth: 8 } }
+};
+var VEHICLES = {
+  bicycle: { name: "Bicycle", range: "Nearby", fuelNeeded: false, fuelUse: 0, cost: { caps: 40, scrap: 4, wood: 2 }, bonus: { rolls: 1, capacity: 5, cooldownCut: 120000 } },
+  motorcycle: { name: "Motorcycle", range: "Region", fuelNeeded: true, fuelUse: 5, cost: { caps: 200, scrap: 10, cloth: 4 }, bonus: { rolls: 2, capacity: 10, cooldownCut: 300000 } },
+  pickup: { name: "Old pickup truck", range: "Far", fuelNeeded: true, fuelUse: 8, cost: { caps: 400, scrap: 15, wood: 5 }, bonus: { rolls: 2, capacity: 25, cooldownCut: 240000 } },
+  wagon: { name: "Rugged wagon", range: "Region", fuelNeeded: false, fuelUse: 0, cost: { caps: 300, wood: 10, cloth: 8 }, bonus: { rolls: 1, capacity: 40, cooldownCut: 120000 } }
+};
+function matCount(id) { return S.inventory[id] || 0; }
+function costText(cost) {
+  var parts = [];
+  if (cost.caps) parts.push(cost.caps + " caps");
+  ["scrap", "wood", "cloth", "herb"].forEach(function (m) { if (cost[m]) parts.push(cost[m] + " " + ITEMS[m].name.toLowerCase()); });
+  return parts.join(", ");
+}
+function canAfford(cost) {
+  if (S.caps < (cost.caps || 0)) return false;
+  var ok = true;
+  ["scrap", "wood", "cloth", "herb"].forEach(function (m) { if (cost[m] && matCount(m) < cost[m]) ok = false; });
+  return ok;
+}
+function payCost(cost) {
+  S.caps -= (cost.caps || 0);
+  ["scrap", "wood", "cloth", "herb"].forEach(function (m) { if (cost[m]) { S.inventory[m] -= cost[m]; if (S.inventory[m] <= 0) delete S.inventory[m]; } });
+}
+function scaleCost(cost, mult) {
+  var out = { caps: Math.round((cost.caps || 0) * mult) };
+  ["scrap", "wood", "cloth", "herb"].forEach(function (m) { if (cost[m]) out[m] = Math.ceil(cost[m] * mult); });
+  return out;
+}
+function weaponDmg(w) { return Math.round(WEAPONS[w.key].dmg * (1 + 0.4 * (w.tier - 1))); }
+function armorDef(a) { return ARMOR[a.key].def + 2 * (a.tier - 1); }
+function equippedWeapon() { var w = null; S.weapons.forEach(function (x) { if (x.equipped && x.dur > 0) w = x; }); return w; }
+function equippedArmor() { var a = null; S.armor.forEach(function (x) { if (x.equipped && x.dur > 0) a = x; }); return a; }
+function kitchenMult() { return 1 + 0.15 * S.rooms.kitchen; }
+
+/* ================= weather, day and night ================= */
+function weatherCodeText(code) {
+  if (code === 0) return "Clear sky";
+  if (code === 1) return "Mostly clear";
+  if (code === 2) return "Partly cloudy";
+  if (code === 3) return "Overcast";
+  if (code === 45 || code === 48) return "Fog";
+  if (code === 51 || code === 53 || code === 55 || code === 56 || code === 57) return "Drizzle";
+  if (code === 61 || code === 63 || code === 65 || code === 66 || code === 67) return "Rain";
+  if (code === 71 || code === 73 || code === 75 || code === 77) return "Snow";
+  if (code === 80 || code === 81 || code === 82) return "Rain showers";
+  if (code === 85 || code === 86) return "Snow showers";
+  if (code === 95) return "Thunderstorm";
+  if (code === 96 || code === 99) return "Storm with hail";
+  return "Unknown";
+}
+function weatherInfo() {
+  var w = S.weather;
+  if (!w) return { kind: "none", hot: false, cold: false, storm: false, raining: false };
+  var c = w.code;
+  var storm = (c === 95 || c === 96 || c === 99 || w.wind >= 60);
+  var raining = ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].indexOf(c) >= 0);
+  var kind = storm ? "storm" : raining ? "rain" : (c === 71 || c === 73 || c === 75 || c === 77 || c === 85 || c === 86) ? "snow" : (c === 45 || c === 48) ? "fog" : (c === 0) ? "clear" : "cloud";
+  return { kind: kind, hot: w.temp >= 32, cold: w.temp <= 5, storm: storm, raining: raining };
+}
+function isNightNow() {
+  var now = new Date();
+  var hh = ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2);
+  var w = S.weather;
+  if (w && w.sunrise && w.sunset) {
+    var sr = w.sunrise.slice(11, 16), ss = w.sunset.slice(11, 16);
+    if (sr && ss) return (hh < sr || hh >= ss);
+  }
+  return (now.getHours() < 6 || now.getHours() >= 18);
+}
+function growthFactor() { var info = weatherInfo(); var f = 1; if (info.raining) f *= 1.25; if (isNightNow()) f *= 0.75; if (S.attrs.int >= 10) f *= 1.1; return f; }
+function fetchWeather(force) {
+  if (!S || !S.lat || !S.lon) { if (S) { S.weather = null; } return; }
+  if (!force && S.weatherAt && Date.now() - S.weatherAt < 1800000) return;
+  var url = "https://api.open-meteo.com/v1/forecast?latitude=" + S.lat + "&longitude=" + S.lon + "&current=temperature_2m,weather_code,wind_speed_10m&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=3";
+  fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+    if (!d.current) throw new Error("no current");
+    var fc = [];
+    if (d.daily && d.daily.time) d.daily.time.forEach(function (t, i) {
+      fc.push({ date: t, max: d.daily.temperature_2m_max[i], min: d.daily.temperature_2m_min[i], precip: d.daily.precipitation_probability_max ? d.daily.precipitation_probability_max[i] : null });
+    });
+    S.weather = { temp: Math.round(d.current.temperature_2m), code: d.current.weather_code, wind: Math.round(d.current.wind_speed_10m), sunrise: d.daily.sunrise[0], sunset: d.daily.sunset[0], forecast: fc };
+    S.weatherAt = Date.now();
+    save(); renderAll();
+  }).catch(function () { S.weather = null; S.weatherAt = Date.now(); save(); renderAll(); });
+}
+function weatherCardHTML() {
+  var w = S.weather;
+  if (!w) return '<div class="card"><h2>Weather in ' + esc(S.city) + '</h2><p>Signal lost. No live weather right now, so no weather effects apply. Weather numbers are never invented.</p><button class="btn2 btnsm" type="button" data-act="refresh-weather">Refresh weather</button></div>';
+  var info = weatherInfo();
+  var eff = [];
+  if (info.raining) eff.push("Rain: farm crops grow 25 percent faster.");
+  if (info.storm) eff.push("Storm: scavenging is riskier, injury chance up.");
+  if (info.hot) eff.push("Heat: thirst decays 50 percent faster, less at Home Base.");
+  if (info.cold) eff.push("Cold: hunger decays 50 percent faster, less at Home Base.");
+  if (!eff.length) eff.push("No strong weather effects right now.");
+  var fc = w.forecast.map(function (f) { return f.date + ": " + f.min + " to " + f.max + " C" + (f.precip !== null ? ", rain chance " + f.precip + "%" : ""); }).join("<br>");
+  return '<div class="card"><h2>Weather in ' + esc(S.city) + ', ' + esc(S.country) + '</h2><p><b>' + w.temp + ' C, ' + weatherCodeText(w.code) + '</b><br>Wind: ' + w.wind + ' km/h<br><span class="small">Live from Open-Meteo for your city.</span></p><p><b>Forecast</b><br>' + fc + '</p><p><b>Weather effects now</b><br>' + eff.join("<br>") + '</p><button class="btn2 btnsm" type="button" data-act="refresh-weather">Refresh weather</button></div>';
+}
+function applyDayNight() {
+  if (!S) return;
+  var night = isNightNow();
+  document.body.classList.toggle("day", !night);
+  document.body.classList.toggle("night", night);
+  var pill = $("dayNightPill"); if (pill) pill.textContent = night ? "Night" : "Day";
+  var st = $("sunTimes");
+  if (st) st.textContent = (S.weather && S.weather.sunrise && S.weather.sunset) ? ("Sunrise " + S.weather.sunrise.slice(11, 16) + " · Sunset " + S.weather.sunset.slice(11, 16)) : "Sunrise and sunset times unavailable offline";
+  var tb = $("testBanner"); if (tb) tb.classList.toggle("hidden", !isTestMode);
+  dailyEmotionCheck();
+}
+function dailyEmotionCheck() {
+  if (!S.socialToday) return;
+  var today = todayStr();
+  if (S.socialToday.date === today) return;
+  if (!S.socialToday.pet && !S.socialToday.visit) bumpEmotion("loneliness", 15, "A quiet day with no pet time and no market or clinic visits raised loneliness.");
+  if (S.healthDetail) S.healthDetail.sleep = clamp(S.healthDetail.sleep - 3, 0, 100);
+  S.socialToday = { date: today, pet: false, visit: false };
+  if (S.eatenToday) S.eatenToday = { date: today, types: [] };
+  save();
+}
+function noteSocial(kind) {
+  if (S.socialToday.date !== todayStr()) S.socialToday = { date: todayStr(), pet: false, visit: false };
+  S.socialToday[kind] = true;
+  bumpEmotion("loneliness", -5, kind === "pet" ? "Time with your dog eased loneliness." : "A market or clinic visit eased loneliness.");
+}
+
+/* ================= emotions and health ================= */
+function bumpEmotion(key, delta, reason) {
+  if (!S.emotions) return;
+  S.emotions[key] = clamp(S.emotions[key] + delta, 0, 100);
+  if (reason) {
+    var now = new Date();
+    S.emotionLog.unshift({ t: ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2), text: reason });
+    S.emotionLog = S.emotionLog.slice(0, 8);
+  }
+}
+function dominantEmotion() {
+  var e = S.emotions;
+  var list = [["hope", "Hopeful"], ["stress", "Stressed"], ["loneliness", "Lonely"], ["contentment", "Content"]];
+  var best = null, bestV = 40;
+  list.forEach(function (row) { if (e[row[0]] > bestV) { best = row; bestV = e[row[0]]; } });
+  return best ? { key: best[0], name: best[1], value: bestV } : { key: "steady", name: "Steady", value: 0 };
+}
+function emotionIcon(key) {
+  var p = {
+    hope: '<circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2 V5 M12 19 V22 M2 12 H5 M19 12 H22" stroke="currentColor" stroke-width="1.8"/>',
+    stress: '<path d="M3 13 L7 13 L10 6 L14 19 L17 13 L21 13" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+    loneliness: '<circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20 Q5 14 12 14 Q19 14 19 20" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+    content: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 14 Q12 18 16 14" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/>',
+    steady: '<path d="M3 12 H21" stroke="currentColor" stroke-width="1.8"/>'
+  };
+  return '<svg viewBox="0 0 24 24" style="width:22px;height:22px;vertical-align:middle" aria-hidden="true">' + (p[key] || p.steady) + "</svg>";
+}
+function stamina() { return Math.round((S.healthDetail.fitness + S.stats.energy + S.healthDetail.sleep) / 3); }
+function wellbeing() { return clamp(Math.round((S.stats.health + S.healthDetail.fitness + stamina() + S.healthDetail.sleep + S.healthDetail.nutrition) / 5) - 10 * S.ailments.length, 0, 100); }
+function addAilment(kind) {
+  if (S.ailments.length >= 3) return;
+  var names = kind === "injury" ? ["Sprained ankle", "Cut arm", "Bruised ribs"] : ["Fever", "Stomach bug", "Bad cough"];
+  var name = names[Math.floor(Math.random() * names.length)];
+  S.ailments.push({ kind: kind, name: name });
+  showMsg("You picked up an ailment: " + name + ". It drains health until treated at the Clinic or with medicine.");
+}
+function treatAilment(i, method) {
+  var a = S.ailments[i];
+  if (!a) return;
+  if (method === "clinic") {
+    if (S.caps < 20) { showMsg("Treating an ailment at the Clinic costs 20 caps."); return; }
+    S.caps -= 20;
+  } else {
+    var item = a.kind === "injury" ? "bandage" : "medkit";
+    if (!S.inventory[item]) { showMsg("You need a " + ITEMS[item].name + " to treat " + a.name + "."); return; }
+    S.inventory[item] -= 1; if (S.inventory[item] <= 0) delete S.inventory[item];
+  }
+  S.ailments.splice(i, 1);
+  showMsg(a.name + " treated. Your health will stop draining from it.");
+  save(); renderAll();
+}
+
+/* ================= Home tab ================= */
+var marketOpen = false;
+function renderHome() {
+  var el = $("view-home");
+  var rooms = [
+    { id: "bed", name: "Bed", desc: "Rest restores " + (35 + S.rooms.bed * 15) + " energy. Next level: " + (35 + (S.rooms.bed + 1) * 15) + " energy." },
+    { id: "storage", name: "Storage", desc: "Carry capacity is " + capacity() + " items. Next level adds 10." },
+    { id: "kitchen", name: "Kitchen", desc: "Food restores " + Math.round(kitchenMult() * 100) + " percent of normal. Next level adds 15 percent." },
+    { id: "workshop", name: "Workshop", desc: "Unlocks crafting and weapon and armor building at level 1, and adds 1 farm plot per level." }
+  ];
+  var html = "<h1>" + esc(S.baseName) + "</h1><p class=\"small\">Home base in " + esc(S.city) + ", " + esc(S.country) + ". Current site: " + esc(S.currentSite) + ".</p>";
+  var em = dominantEmotion();
+  html += '<p>You feel <b>' + em.name + "</b> " + emotionIcon(em.key) + ' <button class="btn2 btnsm" type="button" data-act="goto-character">See emotions</button></p>';
+  html += weatherCardHTML();
+  html += '<div class="card"><h2>Rooms</h2>';
+  rooms.forEach(function (r) {
+    var lvl = S.rooms[r.id];
+    html += '<div class="itemrow"><div><b>' + r.name + ' (level ' + lvl + ')</b><br><span>' + r.desc + '</span></div>' + (lvl >= 3 ? '<span>Max level</span>' : '<button class="btn2 btnsm" type="button" data-room="' + r.id + '">Upgrade, ' + roomCost(r.id) + ' caps</button>') + "</div>";
+  });
+  var restLeft = Math.max(0, 600000 - (Date.now() - S.lastRest));
+  html += '<div style="margin-top:12px"><button class="btn" type="button" data-act="rest">Rest</button> <span class="small">' + (restLeft > 0 ? "Rest again in " + fmtTime(restLeft) : "Rest is ready. Restores energy, costs a little hunger and thirst.") + "</span></div>";
+  html += "<p class=\"small\">If your Health reaches 0, you collapse and wake at home with a caps and item penalty. No permadeath.</p></div>";
+  html += '<div class="card"><h2>Build menu</h2><p class="small">Buildings take real minutes to construct. The timer keeps running while the app is closed.</p>';
+  Object.keys(BUILDINGS).forEach(function (k) {
+    var b = BUILDINGS[k], st = S.buildings[k];
+    var label = "";
+    if (st.state === "none") label = '<button class="btn2 btnsm" type="button" data-build="' + k + '">Build, ' + costText(b.cost) + ", " + b.minutes + " min</button>";
+    else if (st.state === "building") label = '<span>Building, ready in ' + fmtTime(Math.max(0, st.doneAt - Date.now())) + '</span>';
+    else if (st.tier < 3) { var up = scaleCost(b.cost, 1 + 0.5 * st.tier); label = '<span>Tier ' + st.tier + '</span> <button class="btn2 btnsm" type="button" data-upgrade-build="' + k + '">Upgrade tier ' + (st.tier + 1) + ", " + costText(up) + "</button>"; }
+    else label = "<span>Max tier</span>";
+    html += '<div class="itemrow"><div><b>' + b.name + (st.state === "built" ? " (tier " + st.tier + ")" : "") + '</b><br><span>' + b.desc + "</span></div>" + label + "</div>";
+  });
+  html += "</div>";
+  if (S.rooms.workshop >= 1) {
+    html += '<div class="card"><h2>Crafting (Workshop)</h2><p class="small">Bandages treat injuries. Crafting uses materials from your inventory.</p><button class="btn2 btnsm" type="button" data-act="craft-bandage">Craft bandage (' + craftCost() + ' cloth)</button></div>';
+  } else {
+    html += '<div class="card"><h2>Crafting</h2><p class="small">Upgrade the Workshop to level 1 to unlock crafting, weapon building, and armor building.</p></div>';
+  }
+  html += '<div class="card"><h2>Home storage chest</h2><p class="small">' + chestCount() + " of " + chestCapacity() + " items stored.</p>";
+  var chestKeys = Object.keys(S.chest);
+  if (!chestKeys.length) html += '<p class="small">The chest is empty. Store items here from the Inventory tab.</p>';
+  chestKeys.forEach(function (id) {
+    html += '<div class="itemrow"><div><b>' + ITEMS[id].name + '</b> <span>x' + S.chest[id] + '</span></div><button class="btn2 btnsm" type="button" data-take="' + id + '">Take</button></div>';
+  });
+  html += "</div>";
+  el.innerHTML = html;
+  el.querySelectorAll("[data-room]").forEach(function (b) { b.addEventListener("click", function () { upgradeRoom(b.getAttribute("data-room")); }); });
+  el.querySelectorAll("[data-act]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = b.getAttribute("data-act");
+      if (a === "rest") doRest();
+      else if (a === "goto-character") switchTab("character");
+      else if (a === "refresh-weather") fetchWeather(true);
+      else if (a === "craft-bandage") {
+        if ((S.inventory.cloth || 0) < craftCost()) { showMsg("You need " + craftCost() + " cloth to craft a bandage."); return; }
+        if (!addItem("bandage", 1)) { showMsg("Your inventory is full."); return; }
+        S.inventory.cloth -= craftCost(); if (S.inventory.cloth <= 0) delete S.inventory.cloth;
+        showMsg("Crafted 1 bandage."); save(); renderAll();
+      }
+    });
+  });
+  el.querySelectorAll("[data-take]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var id = b.getAttribute("data-take");
+      if (!addItem(id, 1)) { showMsg("Your inventory is full."); return; }
+      S.chest[id] -= 1; if (S.chest[id] <= 0) delete S.chest[id];
+      showMsg("Took 1 " + ITEMS[id].name + " from the chest."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-build]").forEach(function (b) {
+    b.addEventListener("click", function () { buildBuilding(b.getAttribute("data-build")); });
+  });
+  el.querySelectorAll("[data-upgrade-build]").forEach(function (b) {
+    b.addEventListener("click", function () { upgradeBuilding(b.getAttribute("data-upgrade-build")); });
+  });
+}
+function buildBuilding(key) {
+  var b = BUILDINGS[key];
+  if (S.buildings[key].state !== "none") { showMsg("That building is already started."); return; }
+  if (!canAfford(b.cost)) { showMsg("Not enough caps or materials. Cost: " + costText(b.cost) + "."); return; }
+  payCost(b.cost);
+  S.buildings[key] = { state: "building", tier: 0, doneAt: Date.now() + b.minutes * 60000 };
+  showMsg("Construction started: " + b.name + " will be ready in " + b.minutes + " minutes.");
+  save(); renderAll();
+}
+function upgradeBuilding(key) {
+  var st = S.buildings[key];
+  if (st.state !== "built" || st.tier >= 3) { showMsg("That building cannot be upgraded now."); return; }
+  var up = scaleCost(BUILDINGS[key].cost, 1 + 0.5 * st.tier);
+  if (!canAfford(up)) { showMsg("Not enough caps or materials. Cost: " + costText(up) + "."); return; }
+  payCost(up); st.tier += 1;
+  if (key === "greenhouse") { var pc = plotCount(); while (S.farm.length < pc) S.farm.push({ crop: null, plantedAt: 0, watered: false }); }
+  showMsg(BUILDINGS[key].name + " upgraded to tier " + st.tier + ".");
+  save(); renderAll();
+}
+
+/* ================= World tab ================= */
+function renderWorld() {
+  var el = $("view-world");
+  var v = activeVehicleObj();
+  var info = weatherInfo();
+  var html = "<h1>" + esc(S.city) + "</h1><p class=\"small\">Current site: " + esc(S.currentSite) + ". Active vehicle: " + (v ? esc(VEHICLES[v.key].name) + " (condition " + v.condition + ", fuel " + v.fuel + ", range " + VEHICLES[v.key].range + ")" : "none. Build a Garage to unlock vehicles, then pick one on the Inventory tab.") + "</p>";
+  html += weatherCardHTML();
+  html += '<div class="card"><h2>Locations in ' + esc(S.city) + '</h2>';
+  html += '<div class="itemrow"><div><b>Home Base</b><br><span>' + esc(S.baseName) + '. Sheltered: weather penalties on decay are halved here.</span></div><button class="btn2 btnsm" type="button" data-loc="home">Go home</button></div>';
+  html += '<div class="itemrow"><div><b>Market</b><br><span>Buy and sell with real caps prices. A visit eases loneliness.</span></div><button class="btn2 btnsm" type="button" data-loc="market">Open market</button></div>';
+  html += '<div class="itemrow"><div><b>Clinic</b><br><span>Heal for caps, or treat ailments. A visit eases loneliness.</span></div><button class="btn2 btnsm" type="button" data-loc="clinic">Open clinic</button></div>';
+  html += '<div class="itemrow"><div><b>Farm Fields</b><br><span>' + (info.raining ? "Rain now: crops grow 25 percent faster here." : "Crops grow here over real hours.") + '</span></div><button class="btn2 btnsm" type="button" data-loc="farm">Go to farm</button></div>';
+  var cdLeft = Math.max(0, (600000 - vehicleBonus().cooldownCut) - (Date.now() - S.lastScavenge));
+  html += '<div class="itemrow"><div><b>Ruins</b><br><span>Scavenge for loot. Costs 15 energy.' + (info.storm ? " Storm now: exposed ruins, injury chance up." : "") + (isNightNow() ? " Night: higher risk, better loot." : "") + (cdLeft > 0 ? " Next run in " + fmtTime(cdLeft) + "." : "") + '</span></div><button class="btn2 btnsm" type="button" data-loc="ruins">Scavenge</button></div>';
+  html += '<div class="itemrow"><div><b>Radio Tower</b><br><span>' + (S.radioBoostDate === todayStr() ? "Signal boosted today." : "Boost the radio signal once a day.") + (info.kind === "storm" || (S.weather && S.weather.wind >= 40) ? " High wind now: the tower signal is shaky." : "") + '</span></div><button class="btn2 btnsm" type="button" data-loc="tower">Boost signal</button></div>';
+  html += '<div class="itemrow"><div><b>Work Yard</b><br><span>Daily shifts and odd jobs.</span></div><button class="btn2 btnsm" type="button" data-loc="work">Go to work</button></div>';
+  html += "</div>";
+  if (marketOpen) {
+    html += '<div class="card"><h2>Market</h2><p class="small">Caps: ' + S.caps + ". Carrying " + invCount() + " of " + capacity() + " items.</p><div class=\"row\">";
+    ["All", "Food", "Drink", "Medicine", "Material", "Seed", "Tool", "Weapon", "Valuable"].forEach(function (c) {
+      html += '<button class="btn2 btnsm" type="button" data-mfilter="' + c + '"' + (marketFilter === c ? ' style="border-color:var(--amber);color:var(--gold)"' : "") + ">" + c + "</button>";
+    });
+    html += "</div>";
+    Object.keys(ITEMS).forEach(function (id) {
+      var it = ITEMS[id];
+      if (marketFilter !== "All" && it.cat !== marketFilter) return;
+      html += '<div class="itemrow"><div><b>' + it.name + '</b> <span>' + it.cat + " · buy " + buyPrice(id) + " caps · sell " + sellPrice(id) + " caps" + (S.inventory[id] ? " · you have " + S.inventory[id] : "") + '</span></div><span><button class="btn2 btnsm" type="button" data-buy="' + id + '">Buy</button> ' + (S.inventory[id] ? '<button class="btn2 btnsm" type="button" data-sell="' + id + '">Sell</button>' : "") + "</span></div>";
+    });
+    html += '<button class="btn2 btnsm" type="button" data-act="close-market">Close market</button></div>';
+  }
+  html += '<p class="small">Other survivors will appear here when multiplayer launches.</p>';
+  el.innerHTML = html;
+  el.querySelectorAll("[data-loc]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var loc = b.getAttribute("data-loc");
+      if (loc === "home") { S.currentSite = "Home Base"; save(); switchTab("home"); }
+      else if (loc === "market") { marketOpen = true; S.currentSite = "Market"; noteSocial("visit"); save(); renderAll(); }
+      else if (loc === "clinic") { S.currentSite = "Clinic"; noteSocial("visit"); save(); renderClinic(); }
+      else if (loc === "farm") { S.currentSite = "Farm Fields"; save(); switchTab("farm"); }
+      else if (loc === "ruins") doScavenge();
+      else if (loc === "tower") {
+        S.currentSite = "Radio Tower";
+        if (S.radioBoostDate === todayStr()) { showMsg("The signal is already boosted today."); return; }
+        S.radioBoostDate = todayStr(); S.stats.morale = clamp(S.stats.morale + 5, 0, 100);
+        showMsg("Radio signal boosted. Morale up 5. The Radio tab shows the boost today."); save(); renderAll();
+      }
+      else if (loc === "work") { S.currentSite = "Work Yard"; save(); switchTab("work"); }
+    });
+  });
+  el.querySelectorAll("[data-mfilter]").forEach(function (b) { b.addEventListener("click", function () { marketFilter = b.getAttribute("data-mfilter"); renderAll(); }); });
+  el.querySelectorAll("[data-buy]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var id = b.getAttribute("data-buy");
+      if (S.caps < buyPrice(id)) { showMsg("Not enough caps to buy " + ITEMS[id].name + "."); return; }
+      if (!addItem(id, 1)) { showMsg("Your inventory is full."); return; }
+      S.caps -= buyPrice(id); showMsg("Bought 1 " + ITEMS[id].name + "."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-sell]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var id = b.getAttribute("data-sell");
+      S.inventory[id] -= 1; if (S.inventory[id] <= 0) delete S.inventory[id];
+      S.caps += sellPrice(id); showMsg("Sold 1 " + ITEMS[id].name + " for " + sellPrice(id) + " caps."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-act]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (b.getAttribute("data-act") === "close-market") { marketOpen = false; renderAll(); }
+      if (b.getAttribute("data-act") === "refresh-weather") fetchWeather(true);
+    });
+  });
+}
+function renderClinic() {
+  var el = $("view-world");
+  var html = "<h1>Clinic in " + esc(S.city) + "</h1><p class=\"small\">Health: " + Math.round(S.stats.health) + ". Ailments drain health until treated.</p><div class=\"card\"><h2>Heal</h2>";
+  html += '<button class="btn2" type="button" data-act="heal">Heal 25 health (' + healCost() + ' caps)</button> <button class="btn2" type="button" data-act="back-world">Back to locations</button></div>';
+  html += '<div class="card"><h2>Ailments</h2>';
+  if (!S.ailments.length) html += '<p class="small">No ailments. Good.</p>';
+  S.ailments.forEach(function (a, i) {
+    html += '<div class="itemrow"><div><b>' + esc(a.name) + '</b> <span>' + a.kind + ', drains health over time</span></div><span><button class="btn2 btnsm" type="button" data-treat-clinic="' + i + '">Treat, 20 caps</button> <button class="btn2 btnsm" type="button" data-treat-item="' + i + '">Treat with ' + (a.kind === "injury" ? "bandage" : "medkit") + "</button></span></div>";
+  });
+  html += "</div>";
+  el.innerHTML = html;
+  el.querySelectorAll("[data-act]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = b.getAttribute("data-act");
+      if (a === "heal") {
+        if (S.caps < healCost()) { showMsg("Healing costs " + healCost() + " caps."); return; }
+        if (S.stats.health >= 100) { showMsg("Your health is already full."); return; }
+        S.caps -= healCost(); S.stats.health = clamp(S.stats.health + 25, 0, 100); noteSocial("visit"); showMsg("Clinic healed 25 health."); save(); renderClinic();
+      } else if (a === "back-world") { renderWorld(); }
+    });
+  });
+  el.querySelectorAll("[data-treat-clinic]").forEach(function (b) { b.addEventListener("click", function () { treatAilment(parseInt(b.getAttribute("data-treat-clinic"), 10), "clinic"); renderClinic(); }); });
+  el.querySelectorAll("[data-treat-item]").forEach(function (b) { b.addEventListener("click", function () { treatAilment(parseInt(b.getAttribute("data-treat-item"), 10), "item"); renderClinic(); }); });
+}
+function doScavenge() {
+  var cd = Math.max(120000, 600000 - vehicleBonus().cooldownCut);
+  var left = cd - (Date.now() - S.lastScavenge);
+  if (left > 0) { showMsg("The ruins need time to settle. Next run in " + fmtTime(left) + "."); return; }
+  if (S.stats.energy < 15) { showMsg("You need at least 15 energy to scavenge."); return; }
+  S.lastScavenge = Date.now();
+  S.currentSite = "Ruins";
+  S.stats.energy = clamp(S.stats.energy - 15, 0, 100);
+  var info = weatherInfo();
+  var night = isNightNow();
+  var w = equippedWeapon();
+  var arm = equippedArmor();
+  var rolls = 2 + Math.floor(S.attrs.agi / 5) + (hasAbility("Keen Eyes") ? 1 : 0) + (w ? Math.floor(weaponDmg(w) / 8) : 0) + (S.equipped.weapon === "knife" ? 1 : 0) + (S.equipped.weapon === "rifle" ? 2 : 0) + vehicleBonus().rolls + (night ? 1 : 0) + Math.floor(S.pet.loyalty / 25);
+  rolls = Math.min(rolls, 10);
+  var total = 0; LOOT.forEach(function (row) { total += row[1]; });
+  var found = [];
+  for (var i = 0; i < rolls; i++) {
+    var r = Math.random() * total, acc = 0, pick = LOOT[0][0];
+    for (var j = 0; j < LOOT.length; j++) { acc += LOOT[j][1]; if (r <= acc) { pick = LOOT[j][0]; break; } }
+    if (addItem(pick, 1)) found.push(ITEMS[pick].name);
+  }
+  var chance = 0.25 + (info.storm ? 0.15 : 0) + (night ? 0.10 : 0) - (arm ? armorDef(arm) * 0.01 : 0) - (watchtowerTier() * 0.03);
+  var injured = false, dmg = 0;
+  if (Math.random() < chance) {
+    injured = true;
+    dmg = Math.max(1, 6 + Math.floor(Math.random() * 9) + (info.storm ? 3 : 0) - (arm ? armorDef(arm) : 0));
+    S.stats.health = clamp(S.stats.health - dmg, 0, 100);
+    bumpEmotion("stress", 8, "A rough run in the Ruins raised stress.");
+    if (Math.random() < 0.5) addAilment("injury");
+  }
+  if (w) { w.dur -= 1; if (w.dur <= 0) { w.dur = 0; w.equipped = false; showMsg("Your " + WEAPONS[w.key].name + " broke. Repair it on the Inventory tab."); } }
+  if (arm) { arm.dur -= 1; if (arm.dur <= 0) { arm.dur = 0; arm.equipped = false; showMsg("Your " + ARMOR[arm.key].name + " broke. Repair it on the Inventory tab."); } }
+  var veh = activeVehicleObj();
+  if (veh) {
+    veh.condition = Math.max(0, veh.condition - 2);
+    if (VEHICLES[veh.key].fuelNeeded) veh.fuel = Math.max(0, veh.fuel - VEHICLES[veh.key].fuelUse);
+    if (veh.condition <= 0) showMsg("Your " + VEHICLES[veh.key].name + " is wrecked. Repair it before it helps again.");
+  }
+  S.healthDetail.fitness = clamp(S.healthDetail.fitness + 1, 0, 100);
+  var msg = found.length ? "Scavenged " + found.length + " items: " + found.join(", ") + "." : "The ruins gave up nothing this time, and your pack is full.";
+  if (injured) msg += " You took " + dmg + " damage.";
+  showMsg(msg);
+  if (S.stats.health <= 0) collapse();
+  save(); renderAll();
+}
+
+/* ================= Work tab ================= */
+function renderWork() {
+  var el = $("view-work");
+  var job = jobOf();
+  var done = S.lastShiftDate === todayStr();
+  var pay = Math.round(job.pay * payMult());
+  var guardBonus = 0;
+  if (S.job === "guard") { pay = Math.round(job.pay * payMult() * (1 + 0.15 * watchtowerTier())); var w = equippedWeapon(); if (w) guardBonus = weaponDmg(w); pay += guardBonus; }
+  var html = "<h1>Work in " + esc(S.city) + "</h1><p class=\"small\">Work pay formula: base pay x (1 + 0.05 per Charisma + 0.05 per level above 1, plus 10 percent at Charisma 10) x (1 minus stress / 400)." + (S.job === "guard" ? " Guard bonus: Watchtower adds 15 percent per tier, equipped weapon adds its damage in caps." : "") + "</p>";
+  html += '<div class="card"><h2>Daily shift: ' + job.shift + " (" + job.name + ")</h2><p>Pay: " + pay + " caps · XP: 20 · Energy cost: 20</p><p class=\"small\">Status: " + (done ? "done today, resets at real midnight." : "available.") + "</p>";
+  html += '<button class="btn" type="button" data-act="shift"' + (done ? " disabled" : "") + ">Do daily shift</button></div>";
+  html += '<div class="card"><h2>Odd jobs</h2>';
+  ODD_JOBS.forEach(function (o) {
+    var last = S.oddCooldowns[o.id] || 0;
+    var left = oddCooldownMs(o) - (Date.now() - last);
+    html += '<div class="itemrow"><div><b>' + o.name + '</b><br><span>Pay ' + Math.round(o.pay * payMult()) + " caps · XP " + o.xp + " · Energy " + o.energy + (left > 0 ? " · ready in " + fmtTime(left) : "") + '</span></div><button class="btn2 btnsm" type="button" data-odd="' + o.id + '"' + (left > 0 ? " disabled" : "") + ">Do job</button></div>";
+  });
+  html += "</div>";
+  el.innerHTML = html;
+  el.querySelectorAll("[data-act]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (S.lastShiftDate === todayStr()) { showMsg("Shift already done today. It resets at real midnight."); return; }
+      if (S.stats.energy < 20) { showMsg("You need at least 20 energy for a shift."); return; }
+      S.lastShiftDate = todayStr();
+      S.stats.energy = clamp(S.stats.energy - 20, 0, 100);
+      S.caps += pay; gainXp(20);
+      S.healthDetail.fitness = clamp(S.healthDetail.fitness + 1, 0, 100);
+      var w2 = (S.job === "guard") ? equippedWeapon() : null;
+      if (w2) { w2.dur -= 1; if (w2.dur <= 0) { w2.dur = 0; w2.equipped = false; } }
+      var a2 = equippedArmor();
+      if (a2) { a2.dur -= 1; if (a2.dur <= 0) { a2.dur = 0; a2.equipped = false; } }
+      if (Math.random() < 0.10) addAilment(Math.random() < 0.5 ? "injury" : "illness");
+      showMsg("Shift done. Earned " + pay + " caps and 20 XP." + (guardBonus ? " Weapon bonus added " + guardBonus + " caps." : ""));
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-odd]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var o = null; ODD_JOBS.forEach(function (x) { if (x.id === b.getAttribute("data-odd")) o = x; });
+      var left = oddCooldownMs(o) - (Date.now() - (S.oddCooldowns[o.id] || 0));
+      if (left > 0) { showMsg("That job is on cooldown for " + fmtTime(left) + "."); return; }
+      if (S.stats.energy < o.energy) { showMsg("You need at least " + o.energy + " energy for that job."); return; }
+      S.oddCooldowns[o.id] = Date.now();
+      S.stats.energy = clamp(S.stats.energy - o.energy, 0, 100);
+      var p = Math.round(o.pay * payMult());
+      S.caps += p; gainXp(o.xp);
+      S.healthDetail.fitness = clamp(S.healthDetail.fitness + 1, 0, 100);
+      showMsg("Odd job done. Earned " + p + " caps and " + o.xp + " XP.");
+      save(); renderAll();
+    });
+  });
+}
+
+/* ================= Farm tab ================= */
+function cropStage(plot) {
+  if (!plot.crop) return "";
+  var dur = CROPS[plot.crop].hours * 3600000;
+  var prog = (Date.now() - plot.plantedAt) * growthFactor() * (plot.watered ? 1.2 : 1) / dur;
+  if (prog >= 1) return "ready";
+  if (prog >= 0.6) return "growing";
+  if (prog >= 0.25) return "sprouting";
+  return "seeded";
+}
+function renderFarm() {
+  var el = $("view-farm");
+  while (S.farm.length < plotCount()) S.farm.push({ crop: null, plantedAt: 0, watered: false });
+  var html = "<h1>Farm Fields in " + esc(S.city) + "</h1><p class=\"small\">" + plotCount() + " plots. Crops grow over real hours, even while the app is closed. Rain grows crops 25 percent faster, night grows them 25 percent slower, watering adds 20 percent speed. Harvest: 2 crops, plus 1 for Green Thumb, plus 1 when contentment is 60 or more.</p><div class=\"plot\">";
+  S.farm.forEach(function (plot, i) {
+    var stage = cropStage(plot);
+    html += '<div class="plotbox"><b>Plot ' + (i + 1) + "</b><br>";
+    if (!plot.crop) {
+      html += '<span class="small">Empty plot. Plant seeds from your inventory:</span><br>';
+      Object.keys(CROPS).forEach(function (k) {
+        var c = CROPS[k];
+        html += '<button class="btn2 btnsm" type="button" data-plant="' + i + ":" + k + '"' + ((S.inventory[c.seed] || 0) < 1 ? " disabled" : "") + ">Plant " + c.name + " (" + c.hours + "h, seeds: " + (S.inventory[c.seed] || 0) + ")</button> ";
+      });
+    } else {
+      html += '<span>' + CROPS[plot.crop].name + " · stage: " + stage + (plot.watered ? " · watered" : "") + "</span><br>";
+      if (stage !== "ready") html += '<button class="btn2 btnsm" type="button" data-water="' + i + '"' + (plot.watered ? " disabled" : "") + ">Water</button> ";
+      else html += '<button class="btn" type="button" data-harvest="' + i + '">Harvest</button> ';
+    }
+    html += "</div>";
+  });
+  html += "</div>";
+  el.innerHTML = html;
+  el.querySelectorAll("[data-plant]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var parts = b.getAttribute("data-plant").split(":");
+      var i = parseInt(parts[0], 10), k = parts[1];
+      var seed = CROPS[k].seed;
+      if ((S.inventory[seed] || 0) < 1) { showMsg("You have no " + ITEMS[seed].name + "."); return; }
+      S.inventory[seed] -= 1; if (S.inventory[seed] <= 0) delete S.inventory[seed];
+      S.farm[i] = { crop: k, plantedAt: Date.now(), watered: false };
+      bumpEmotion("contentment", 5, "Planting a crop raised contentment.");
+      showMsg("Planted " + CROPS[k].name + ". Ready in about " + CROPS[k].hours + " real hours.");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-water]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var i = parseInt(b.getAttribute("data-water"), 10);
+      S.farm[i].watered = true;
+      bumpEmotion("contentment", 3, "Watering a crop raised contentment.");
+      showMsg("Plot " + (i + 1) + " watered. It now grows 20 percent faster.");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-harvest]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var i = parseInt(b.getAttribute("data-harvest"), 10);
+      var plot = S.farm[i];
+      var qty = 2 + (hasAbility("Green Thumb") ? 1 : 0) + (S.emotions.contentment >= 60 ? 1 : 0);
+      var got = 0;
+      for (var n = 0; n < qty; n++) if (addItem(CROPS[plot.crop].out, 1)) got += 1;
+      S.farm[i] = { crop: null, plantedAt: 0, watered: false };
+      bumpEmotion("hope", 8, "A successful harvest raised hope.");
+      gainXp(15);
+      showMsg("Harvested " + got + " " + ITEMS[CROPS[plot.crop].out].name + " and gained 15 XP." + (got < qty ? " Your pack was too full for the rest." : ""));
+      save(); renderAll();
+    });
+  });
+}
+
+/* ================= Inventory tab ================= */
+function loyaltyGain(base) { return Math.max(0, Math.round(base * (1 - (S.emotions ? S.emotions.loneliness : 0) / 200))); }
+function renderInventory() {
+  var el = $("view-inventory");
+  var cats = ["All", "Food", "Drink", "Medicine", "Material", "Seed", "Tool", "Weapon", "Valuable", "Weapons", "Armor", "Vehicles"];
+  var html = "<h1>Inventory</h1><p class=\"small\">Carrying " + invCount() + " of " + capacity() + " items. Capacity: 20 base, plus 10 per Storage room level, plus 15 per Storage Shed tier, plus 10 for Heavy Lifter, plus your active vehicle bonus.</p><div class=\"row\">";
+  cats.forEach(function (c) {
+    html += '<button class="btn2 btnsm" type="button" data-ifilter="' + c + '"' + (invFilter === c ? ' style="border-color:var(--amber);color:var(--gold)"' : "") + ">" + c + "</button>";
+  });
+  html += "</div>";
+  if (invFilter === "Weapons" || invFilter === "Armor" || invFilter === "Vehicles") {
+    html += renderGear(invFilter);
+  } else {
+    var keys = Object.keys(S.inventory);
+    if (!keys.length) html += '<p class="small">Your pack is empty. Scavenge the Ruins or buy at the Market.</p>';
+    keys.forEach(function (id) {
+      var it = ITEMS[id];
+      if (!it) return;
+      if (invFilter !== "All" && it.cat !== invFilter) return;
+      var eq = (S.equipped.tool === id || S.equipped.weapon === id) ? " (equipped)" : "";
+      html += '<div class="itemrow"><div><b>' + it.name + eq + '</b> <span>x' + S.inventory[id] + " · " + it.cat + "</span></div><span>";
+      if (it.use) html += '<button class="btn2 btnsm" type="button" data-use="' + id + '">Use</button> ';
+      if (it.equip) html += '<button class="btn2 btnsm" type="button" data-equip="' + id + '">Equip</button> ';
+      html += '<button class="btn2 btnsm" type="button" data-store="' + id + '">Store</button> ';
+      html += '<button class="btn2 btnsm" type="button" data-drop="' + id + '">Drop</button></span></div>';
+    });
+    html += '<p class="small">Equipped tool or weapon: ' + (S.equipped.tool ? ITEMS[S.equipped.tool].name : "none") + (S.equipped.weapon ? ", " + ITEMS[S.equipped.weapon].name : "") + ". Old rusty gear adds a small scavenge bonus. Built weapons with durability are under the Weapons filter.</p>";
+  }
+  el.innerHTML = html;
+  el.querySelectorAll("[data-ifilter]").forEach(function (b) { b.addEventListener("click", function () { invFilter = b.getAttribute("data-ifilter"); renderAll(); }); });
+  el.querySelectorAll("[data-use]").forEach(function (b) {
+    b.addEventListener("click", function () { useItem(b.getAttribute("data-use")); });
+  });
+  el.querySelectorAll("[data-equip]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var id = b.getAttribute("data-equip");
+      S.equipped[ITEMS[id].equip] = id;
+      showMsg("Equipped " + ITEMS[id].name + ".");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-store]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var id = b.getAttribute("data-store");
+      if (chestCount() + 1 > chestCapacity()) { showMsg("The home chest is full."); return; }
+      S.inventory[id] -= 1; if (S.inventory[id] <= 0) delete S.inventory[id];
+      S.chest[id] = (S.chest[id] || 0) + 1;
+      showMsg("Stored 1 " + ITEMS[id].name + " in the home chest.");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-drop]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var id = b.getAttribute("data-drop");
+      S.inventory[id] -= 1; if (S.inventory[id] <= 0) delete S.inventory[id];
+      if (S.equipped.tool === id) S.equipped.tool = null;
+      if (S.equipped.weapon === id) S.equipped.weapon = null;
+      showMsg("Dropped 1 " + ITEMS[id].name + ".");
+      save(); renderAll();
+    });
+  });
+  bindGear(el);
+}
+function useItem(id) {
+  var it = ITEMS[id];
+  if (!S.inventory[id]) { showMsg("You do not have that item."); return; }
+  var use = it.use;
+  var mult = 1;
+  if (it.cat === "Food") mult = kitchenMult();
+  if (it.cat === "Medicine" && S.job === "medic") mult = 1.25;
+  S.inventory[id] -= 1; if (S.inventory[id] <= 0) delete S.inventory[id];
+  Object.keys(use).forEach(function (k) {
+    S.stats[k] = clamp(S.stats[k] + Math.round(use[k] * mult), 0, 100);
+  });
+  if (it.cat === "Food") {
+    if (S.eatenToday.date !== todayStr()) S.eatenToday = { date: todayStr(), types: [] };
+    if (S.eatenToday.types.indexOf(id) < 0) { S.eatenToday.types.push(id); S.healthDetail.nutrition = clamp(S.healthDetail.nutrition + 3, 0, 100); }
+    else S.healthDetail.nutrition = clamp(S.healthDetail.nutrition + 1, 0, 100);
+  }
+  showMsg("Used 1 " + it.name + ".");
+  save(); renderAll();
+}
+function renderGear(kind) {
+  var html = "";
+  if (kind === "Weapons") {
+    html += '<div class="card"><h2>Build weapons (Workshop level 1 required)</h2>';
+    if (S.rooms.workshop < 1) html += '<p class="small">Upgrade the Workshop room to level 1 first. No weapon building before the Workshop exists.</p>';
+    Object.keys(WEAPONS).forEach(function (k) {
+      var w = WEAPONS[k];
+      html += '<div class="itemrow"><div><b>' + w.name + '</b><br><span>Damage ' + w.dmg + " · durability " + w.dur + " · cost: " + costText(w.cost) + "</span></div>" + (S.rooms.workshop >= 1 ? '<button class="btn2 btnsm" type="button" data-build-weapon="' + k + '">Build</button>' : "<span>Locked</span>") + "</div>";
+    });
+    html += "</div><div class=\"card\"><h2>Your weapons</h2>";
+    if (!S.weapons.length) html += '<p class="small">No built weapons yet.</p>';
+    S.weapons.forEach(function (w, i) {
+      var rep = Math.max(0, Math.ceil((w.maxDur - w.dur) / 10));
+      var repCaps = Math.max(5, Math.ceil((w.maxDur - w.dur) / 5) * 5);
+      html += '<div class="itemrow"><div><b>' + WEAPONS[w.key].name + (w.equipped ? " (equipped)" : "") + '</b><br><span>Tier ' + w.tier + " · damage " + weaponDmg(w) + " · durability " + w.dur + "/" + w.maxDur + (w.dur <= 0 ? " · BROKEN" : "") + "</span></div><span>";
+      html += '<button class="btn2 btnsm" type="button" data-equip-weapon="' + i + '">' + (w.equipped ? "Unequip" : "Equip") + "</button> ";
+      html += '<button class="btn2 btnsm" type="button" data-repair-weapon="' + i + '">Repair (' + repCaps + " caps, " + rep + " scrap)</button> ";
+      html += (w.tier < 3 ? '<button class="btn2 btnsm" type="button" data-upgrade-weapon="' + i + '">Upgrade to tier ' + (w.tier + 1) + " (" + costText(scaleCost(WEAPONS[w.key].cost, w.tier)) + ")</button>" : "<span>Max tier</span>");
+      html += "</span></div>";
+    });
+    html += "</div>";
+  } else if (kind === "Armor") {
+    html += '<div class="card"><h2>Build armor (Workshop level 1 required)</h2>';
+    if (S.rooms.workshop < 1) html += '<p class="small">Upgrade the Workshop room to level 1 first. No armor building before the Workshop exists.</p>';
+    Object.keys(ARMOR).forEach(function (k) {
+      var a = ARMOR[k];
+      html += '<div class="itemrow"><div><b>' + a.name + '</b><br><span>Defense ' + a.def + " · durability " + a.dur + " · cost: " + costText(a.cost) + "</span></div>" + (S.rooms.workshop >= 1 ? '<button class="btn2 btnsm" type="button" data-build-armor="' + k + '">Build</button>' : "<span>Locked</span>") + "</div>";
+    });
+    html += "</div><div class=\"card\"><h2>Your armor</h2>";
+    if (!S.armor.length) html += '<p class="small">No built armor yet.</p>';
+    S.armor.forEach(function (a, i) {
+      var rep = Math.max(0, Math.ceil((a.maxDur - a.dur) / 10));
+      var repCaps = Math.max(5, Math.ceil((a.maxDur - a.dur) / 5) * 5);
+      html += '<div class="itemrow"><div><b>' + ARMOR[a.key].name + (a.equipped ? " (equipped)" : "") + '</b><br><span>Tier ' + a.tier + " · defense " + armorDef(a) + " · durability " + a.dur + "/" + a.maxDur + (a.dur <= 0 ? " · BROKEN" : "") + "</span></div><span>";
+      html += '<button class="btn2 btnsm" type="button" data-equip-armor="' + i + '">' + (a.equipped ? "Unequip" : "Equip") + "</button> ";
+      html += '<button class="btn2 btnsm" type="button" data-repair-armor="' + i + '">Repair (' + repCaps + " caps, " + rep + " cloth)</button> ";
+      html += (a.tier < 3 ? '<button class="btn2 btnsm" type="button" data-upgrade-armor="' + i + '">Upgrade to tier ' + (a.tier + 1) + " (" + costText(scaleCost(ARMOR[a.key].cost, a.tier)) + ")</button>" : "<span>Max tier</span>");
+      html += "</span></div>";
+    });
+    html += "</div>";
+  } else if (kind === "Vehicles") {
+    html += '<div class="card"><h2>Build or buy vehicles (Garage required)</h2>';
+    if (!garageBuilt()) html += '<p class="small">Build the Garage on the Home tab first. No vehicles before the Garage exists.</p>';
+    Object.keys(VEHICLES).forEach(function (k) {
+      var v = VEHICLES[k];
+      var owned = S.vehicles.some(function (x) { return x.key === k; });
+      html += '<div class="itemrow"><div><b>' + v.name + '</b><br><span>Range ' + v.range + " · loot rolls +" + v.bonus.rolls + " · capacity +" + v.bonus.capacity + " · cooldown cut " + Math.round(v.bonus.cooldownCut / 60000) + " min" + (v.fuelNeeded ? " · uses fuel" : " · no fuel needed") + " · cost: " + costText(v.cost) + "</span></div>" + (owned ? "<span>Owned</span>" : (garageBuilt() ? '<button class="btn2 btnsm" type="button" data-build-vehicle="' + k + '">Build</button>' : "<span>Locked</span>")) + "</div>";
+    });
+    html += "</div><div class=\"card\"><h2>Your vehicles</h2>";
+    if (!S.vehicles.length) html += '<p class="small">No vehicles yet.</p>';
+    S.vehicles.forEach(function (v) {
+      var def = VEHICLES[v.key];
+      var fuelCost = def.fuelNeeded ? Math.max(0, Math.ceil((100 - v.fuel) / 10) * 5) : 0;
+      var repCaps = Math.max(0, Math.ceil((100 - v.condition) / 5) * 5);
+      var repScrap = Math.max(0, Math.ceil((100 - v.condition) / 10));
+      html += '<div class="itemrow"><div><b>' + def.name + (S.activeVehicle === v.key ? " (active)" : "") + '</b><br><span>Condition ' + v.condition + " · fuel " + (def.fuelNeeded ? v.fuel : "not needed") + " · range " + def.range + "</span></div><span>";
+      html += '<button class="btn2 btnsm" type="button" data-active-vehicle="' + v.key + '">Set active</button> ';
+      if (def.fuelNeeded) html += '<button class="btn2 btnsm" type="button" data-fuel-vehicle="' + v.key + '">Fuel (' + fuelCost + " caps)</button> ";
+      html += '<button class="btn2 btnsm" type="button" data-repair-vehicle="' + v.key + '">Repair (' + repCaps + " caps, " + repScrap + " scrap)</button></span></div>";
+    });
+    html += "</div>";
+  }
+  return html;
+}
+function bindGear(el) {
+  el.querySelectorAll("[data-build-weapon]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (S.rooms.workshop < 1) { showMsg("Upgrade the Workshop to level 1 first."); return; }
+      var k = b.getAttribute("data-build-weapon");
+      if (!canAfford(WEAPONS[k].cost)) { showMsg("Not enough caps or materials. Cost: " + costText(WEAPONS[k].cost) + "."); return; }
+      payCost(WEAPONS[k].cost);
+      S.weapons.push({ key: k, tier: 1, dur: WEAPONS[k].dur, maxDur: WEAPONS[k].dur, equipped: false });
+      showMsg("Built a " + WEAPONS[k].name + "."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-equip-weapon]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var w = S.weapons[parseInt(b.getAttribute("data-equip-weapon"), 10)];
+      if (w.equipped) w.equipped = false;
+      else { S.weapons.forEach(function (x) { x.equipped = false; }); if (w.dur > 0) w.equipped = true; else { showMsg("That weapon is broken. Repair it first."); save(); renderAll(); return; } }
+      showMsg(w.equipped ? "Equipped " + WEAPONS[w.key].name + " (damage " + weaponDmg(w) + ")." : "Unequipped " + WEAPONS[w.key].name + ".");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-repair-weapon]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var w = S.weapons[parseInt(b.getAttribute("data-repair-weapon"), 10)];
+      var missing = w.maxDur - w.dur;
+      if (missing <= 0) { showMsg("That weapon is already at full durability."); return; }
+      var caps = Math.max(5, Math.ceil(missing / 5) * 5), scrap = Math.max(1, Math.ceil(missing / 10));
+      if (S.caps < caps || (S.inventory.scrap || 0) < scrap) { showMsg("Repair needs " + caps + " caps and " + scrap + " scrap."); return; }
+      S.caps -= caps; S.inventory.scrap -= scrap; if (S.inventory.scrap <= 0) delete S.inventory.scrap;
+      w.dur = w.maxDur; showMsg("Repaired " + WEAPONS[w.key].name + " to full durability."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-upgrade-weapon]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var w = S.weapons[parseInt(b.getAttribute("data-upgrade-weapon"), 10)];
+      if (w.tier >= 3) { showMsg("That weapon is already max tier."); return; }
+      var cost = scaleCost(WEAPONS[w.key].cost, w.tier);
+      if (!canAfford(cost)) { showMsg("Not enough caps or materials. Cost: " + costText(cost) + "."); return; }
+      payCost(cost); w.tier += 1; w.maxDur += 10; w.dur = w.maxDur;
+      showMsg(WEAPONS[w.key].name + " upgraded to tier " + w.tier + ". Damage is now " + weaponDmg(w) + ".");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-build-armor]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (S.rooms.workshop < 1) { showMsg("Upgrade the Workshop to level 1 first."); return; }
+      var k = b.getAttribute("data-build-armor");
+      if (!canAfford(ARMOR[k].cost)) { showMsg("Not enough caps or materials. Cost: " + costText(ARMOR[k].cost) + "."); return; }
+      payCost(ARMOR[k].cost);
+      S.armor.push({ key: k, tier: 1, dur: ARMOR[k].dur, maxDur: ARMOR[k].dur, equipped: false });
+      showMsg("Built " + ARMOR[k].name + "."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-equip-armor]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = S.armor[parseInt(b.getAttribute("data-equip-armor"), 10)];
+      if (a.equipped) a.equipped = false;
+      else { S.armor.forEach(function (x) { x.equipped = false; }); if (a.dur > 0) a.equipped = true; else { showMsg("That armor is broken. Repair it first."); save(); renderAll(); return; } }
+      showMsg(a.equipped ? "Equipped " + ARMOR[a.key].name + " (defense " + armorDef(a) + ")." : "Unequipped " + ARMOR[a.key].name + ".");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-repair-armor]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = S.armor[parseInt(b.getAttribute("data-repair-armor"), 10)];
+      var missing = a.maxDur - a.dur;
+      if (missing <= 0) { showMsg("That armor is already at full durability."); return; }
+      var caps = Math.max(5, Math.ceil(missing / 5) * 5), cloth = Math.max(1, Math.ceil(missing / 10));
+      if (S.caps < caps || (S.inventory.cloth || 0) < cloth) { showMsg("Repair needs " + caps + " caps and " + cloth + " cloth."); return; }
+      S.caps -= caps; S.inventory.cloth -= cloth; if (S.inventory.cloth <= 0) delete S.inventory.cloth;
+      a.dur = a.maxDur; showMsg("Repaired " + ARMOR[a.key].name + " to full durability."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-upgrade-armor]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = S.armor[parseInt(b.getAttribute("data-upgrade-armor"), 10)];
+      if (a.tier >= 3) { showMsg("That armor is already max tier."); return; }
+      var cost = scaleCost(ARMOR[a.key].cost, a.tier);
+      if (!canAfford(cost)) { showMsg("Not enough caps or materials. Cost: " + costText(cost) + "."); return; }
+      payCost(cost); a.tier += 1; a.maxDur += 10; a.dur = a.maxDur;
+      showMsg(ARMOR[a.key].name + " upgraded to tier " + a.tier + ". Defense is now " + armorDef(a) + ".");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-build-vehicle]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (!garageBuilt()) { showMsg("Build the Garage first."); return; }
+      var k = b.getAttribute("data-build-vehicle");
+      if (!canAfford(VEHICLES[k].cost)) { showMsg("Not enough caps or materials. Cost: " + costText(VEHICLES[k].cost) + "."); return; }
+      payCost(VEHICLES[k].cost);
+      S.vehicles.push({ key: k, condition: 100, fuel: 100 });
+      if (!S.activeVehicle) S.activeVehicle = k;
+      showMsg("Built a " + VEHICLES[k].name + "."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-active-vehicle]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      S.activeVehicle = b.getAttribute("data-active-vehicle");
+      showMsg("Active vehicle: " + VEHICLES[S.activeVehicle].name + "."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-fuel-vehicle]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var v = null; S.vehicles.forEach(function (x) { if (x.key === b.getAttribute("data-fuel-vehicle")) v = x; });
+      var cost = Math.max(0, Math.ceil((100 - v.fuel) / 10) * 5);
+      if (v.fuel >= 100) { showMsg("The tank is already full."); return; }
+      if (S.caps < cost) { showMsg("Fueling costs " + cost + " caps."); return; }
+      S.caps -= cost; v.fuel = 100; showMsg("Tank filled for " + cost + " caps."); save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-repair-vehicle]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var v = null; S.vehicles.forEach(function (x) { if (x.key === b.getAttribute("data-repair-vehicle")) v = x; });
+      var missing = 100 - v.condition;
+      if (missing <= 0) { showMsg("That vehicle is already in full condition."); return; }
+      var caps = Math.ceil(missing / 5) * 5, scrap = Math.ceil(missing / 10);
+      if (S.caps < caps || (S.inventory.scrap || 0) < scrap) { showMsg("Repair needs " + caps + " caps and " + scrap + " scrap."); return; }
+      S.caps -= caps; S.inventory.scrap -= scrap; if (S.inventory.scrap <= 0) delete S.inventory.scrap;
+      v.condition = 100; showMsg("Repaired " + VEHICLES[v.key].name + " to full condition."); save(); renderAll();
+    });
+  });
+}
+
+/* ================= Pet tab ================= */
+function petStatusLine() {
+  var p = S.pet;
+  var words = [];
+  if (p.hunger < 40) words.push("hungry");
+  if (p.loyalty >= 60 && p.hunger >= 50) words.push("happy");
+  if (p.loyalty >= 75) words.push("loyal");
+  if (!words.length) words.push("settling in");
+  return p.name + " is " + words.join(" and ") + ".";
+}
+function renderPet() {
+  var el = $("view-pet");
+  if (!S.pet.adopted) {
+    var html = "<h1>Adopt a dog</h1><p class=\"small\">A dog raises your scavenging loot: plus 1 loot roll per 25 loyalty. Loyalty grows with feeding, play, and training.</p><div class=\"card\">";
+    html += '<label for="petName">Dog name</label><input id="petName" maxlength="24" placeholder="Name your dog"><label>Coat color</label><div class="row" id="petCoats"></div>';
+    html += '<div style="text-align:center;margin:12px 0" id="petPreview"></div><button class="btn" type="button" data-act="adopt">Adopt</button></div>';
+    el.innerHTML = html;
+    var coat = 0;
+    var draw = function () {
+      $("petPreview").innerHTML = dogSVG(coat);
+      $("petCoats").innerHTML = DOG_COATS.map(function (c, i) {
+        return '<button type="button" class="optbtn' + (i === coat ? " sel" : "") + '" data-coat="' + i + '">' + c.name + "</button>";
+      }).join("");
+      $("petCoats").querySelectorAll("button").forEach(function (b) {
+        b.addEventListener("click", function () { coat = parseInt(b.getAttribute("data-coat"), 10); draw(); });
+      });
+    };
+    draw();
+    el.querySelector("[data-act]").addEventListener("click", function () {
+      var nm = $("petName").value.trim();
+      if (!nm) { showMsg("Name your dog first."); return; }
+      S.pet = { adopted: true, name: nm, coat: coat, hunger: 80, loyalty: 20, training: 0 };
+      noteSocial("pet");
+      showMsg("You adopted " + nm + ". A loyal dog is the best company left in the world.");
+      save(); renderAll();
+    });
+    return;
+  }
+  var p = S.pet;
+  var html = "<h1>" + esc(p.name) + "</h1><div style=\"text-align:center\">" + dogSVG(p.coat) + "</div>";
+  html += '<p>' + petStatusLine() + '</p><div class="card"><p>Hunger: ' + Math.round(p.hunger) + ' · Loyalty: ' + Math.round(p.loyalty) + ' · Training: ' + Math.round(p.training) + '</p><p class="small">Loyalty bonus now: plus ' + Math.floor(p.loyalty / 25) + ' loot rolls on scavenging runs. Loneliness reduces loyalty gains by ' + Math.round(S.emotions.loneliness / 2) + ' percent.</p>';
+  html += '<div class="row"><button class="btn2" type="button" data-act="feed">Feed (1 food item)</button><button class="btn2" type="button" data-act="play">Play (5 energy)</button><button class="btn2" type="button" data-act="train">Train (8 energy, 5 XP)</button></div></div>';
+  el.innerHTML = html;
+  el.querySelectorAll("[data-act]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = b.getAttribute("data-act");
+      if (a === "feed") {
+        var food = null;
+        ["greens_crop", "canned_beans", "dried_meat", "roots_crop", "grain_crop", "stew"].forEach(function (id) { if (!food && S.inventory[id]) food = id; });
+        if (!food) { showMsg("You have no food to feed " + p.name + "."); return; }
+        S.inventory[food] -= 1; if (S.inventory[food] <= 0) delete S.inventory[food];
+        p.hunger = clamp(p.hunger + 30, 0, 100);
+        p.loyalty = clamp(p.loyalty + loyaltyGain(2), 0, 100);
+        noteSocial("pet");
+        showMsg(p.name + " ate and is happier. Hunger up 30, loyalty up " + loyaltyGain(2) + ".");
+      } else if (a === "play") {
+        if (S.stats.energy < 5) { showMsg("You need at least 5 energy to play."); return; }
+        S.stats.energy = clamp(S.stats.energy - 5, 0, 100);
+        p.loyalty = clamp(p.loyalty + loyaltyGain(5), 0, 100);
+        S.stats.morale = clamp(S.stats.morale + 3, 0, 100);
+        S.healthDetail.fitness = clamp(S.healthDetail.fitness + 1, 0, 100);
+        noteSocial("pet");
+        showMsg("You played with " + p.name + ". Loyalty up " + loyaltyGain(5) + ", your fitness up 1.");
+      } else if (a === "train") {
+        if (S.stats.energy < 8) { showMsg("You need at least 8 energy to train."); return; }
+        S.stats.energy = clamp(S.stats.energy - 8, 0, 100);
+        p.training = clamp(p.training + 8, 0, 100);
+        p.loyalty = clamp(p.loyalty + loyaltyGain(4), 0, 100);
+        noteSocial("pet");
+        gainXp(5);
+        showMsg("Training done. Training up 8, loyalty up " + loyaltyGain(4) + ", 5 XP.");
+      }
+      save(); renderAll();
+    });
+  });
+}
+
+/* ================= Character tab ================= */
+function healCost() { return S.job === "medic" ? 11 : 15; }
+function craftCost() { return S.job === "mechanic" ? 1 : 2; }
+function oddCooldownMs(o) { return hasAbility("Quick Hands") ? o.cooldownMin * 60000 * 0.8 : o.cooldownMin * 60000; }
+function exportSaveText() { return JSON.stringify(S, null, 2); }
+function exportSave() {
+  var text = exportSaveText();
+  try {
+    var blob = new Blob([text], { type: "application/json" });
+    var url = (window.URL || window.webkitURL).createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = (isTestMode ? "stars-test-save.json" : "stars-save.json");
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    showMsg("Save downloaded.");
+  } catch (e) { window._lastExport = text; showMsg("Save prepared. Download is not available in this browser, but the save text was kept for copy."); }
+}
+function importSaveText(text) {
+  var data = JSON.parse(text);
+  if (!data || !data.name || !data.stats) throw new Error("not a STARS save");
+  S = data;
+  normalizeSave();
+  save();
+  buildTabbar();
+  switchTab("home");
+  showMsg("Save imported for " + S.name + ".");
+}
+function renderCharacter() {
+  var el = $("view-character");
+  var em = dominantEmotion();
+  var w = equippedWeapon(), a = equippedArmor();
+  var html = "";
+  if (isTestMode) html += '<div class="card" style="border-color:var(--red);text-align:center"><b>TEST SURVIVOR</b><br><span class="small">This is the labeled test profile. Its progress is stored separately and never touches a real survivor.</span><br><button class="btn2" type="button" data-act="exit-test" style="margin-top:8px">Exit test mode</button></div>';
+  html += '<div style="text-align:center">' + avatarSVG(S.appearance) + "<h1>" + esc(S.name) + "</h1><p class=\"small\">" + JOBS[S.job].name + " · " + esc(S.city) + ", " + esc(S.country) + " · " + esc(S.baseName) + " · Day " + dayNumber() + "</p></div>";
+  html += '<div class="card"><h2>Level ' + S.level + "</h2><p>XP: " + S.xp + "/" + xpNeeded(S.level) + (S.points > 0 ? " · <b class=\"gold\">" + S.points + " attribute point(s) to spend</b>" : "") + "</p>";
+  var names = { str: "Strength", agi: "Agility", end: "Endurance", int: "Intellect", cha: "Charisma" };
+  Object.keys(names).forEach(function (k) {
+    html += '<div class="attrrow"><span>' + names[k] + "</span><span></span><b>" + S.attrs[k] + "</b>" + (S.points > 0 ? '<button type="button" data-attr="' + k + '">+</button>' : "<span></span>") + "</div>";
+  });
+  html += '<p class="small">Points change real results: Strength and Agility raise scavenging and work, Endurance slows decay strain, Intellect speeds farm growth at 10, Charisma raises work pay.</p></div>';
+  html += '<div class="card"><h2>Abilities</h2><p><b>' + jobOf().ability + ":</b> " + jobOf().abilityText + "</p>";
+  if (hasAbility("Heavy Lifter")) html += "<p><b>Heavy Lifter (Strength 10):</b> Carry capacity plus 10.</p>";
+  if (hasAbility("Quick Hands")) html += "<p><b>Quick Hands (Agility 10):</b> Odd job cooldowns 20 percent shorter.</p>";
+  if (hasAbility("Sharp Mind")) html += "<p><b>Sharp Mind (Intellect 10):</b> Farm growth 10 percent faster.</p>";
+  if (hasAbility("Silver Tongue")) html += "<p><b>Silver Tongue (Charisma 10):</b> Work pay plus 10 percent.</p>";
+  html += "<p><b>Equipped weapon:</b> " + (w ? WEAPONS[w.key].name + " (tier " + w.tier + ", damage " + weaponDmg(w) + ", durability " + w.dur + "/" + w.maxDur + ")" : "none") + "<br><b>Equipped armor:</b> " + (a ? ARMOR[a.key].name + " (tier " + a.tier + ", defense " + armorDef(a) + ", durability " + a.dur + "/" + a.maxDur + ")" : "none") + "<br><b>Active vehicle:</b> " + (S.activeVehicle ? VEHICLES[S.activeVehicle].name : "none") + "</p></div>";
+  html += '<div class="card"><h2>Emotions</h2><p>' + emotionIcon(em.key) + ' <b>You feel ' + em.name + ".</b></p>";
+  [["hope", "Hope"], ["stress", "Stress"], ["loneliness", "Loneliness"], ["contentment", "Contentment"]].forEach(function (row) {
+    html += '<div class="stat"><span>' + row[1] + '</span><div class="bar"><i style="width:' + S.emotions[row[0]] + '%"></i></div><b>' + Math.round(S.emotions[row[0]]) + "</b></div>";
+  });
+  html += '<p class="small"><b>Real effects, stated plainly:</b><br>Hope: resting restores plus 1 morale per 20 hope.<br>Stress: work pay is reduced by stress / 4 percent.<br>Loneliness: pet loyalty gains are reduced by loneliness / 2 percent.<br>Contentment at 60 or more: each harvest gives 1 bonus crop.</p>';
+  html += '<p class="small"><b>What changed lately:</b><br>' + (S.emotionLog.length ? S.emotionLog.map(function (l) { return l.t + " " + esc(l.text); }).join("<br>") : "Nothing yet. Play, and your emotions will follow what you actually do.") + "</p></div>";
+  html += '<div class="card"><h2>Health panel</h2><p class="small">Wellbeing is the average of health, fitness, stamina, sleep, and nutrition, minus 10 per untreated ailment. Stamina is the average of fitness, energy, and sleep quality.</p>';
+  [["Fitness", Math.round(S.healthDetail.fitness), "Rises with scavenging, work, and pet play."], ["Stamina", stamina(), "Average of fitness, energy, and sleep quality."], ["Sleep quality", Math.round(S.healthDetail.sleep), "Rises 6 per rest, falls 3 per day."], ["Nutrition", Math.round(S.healthDetail.nutrition), "Rises more when you eat varied food."], ["Wellbeing score", wellbeing(), "One number for your whole condition."]].forEach(function (row) {
+    html += '<div class="stat"><span>' + row[0] + '</span><div class="bar green"><i style="width:' + row[1] + '%"></i></div><b>' + row[1] + "</b></div><p class=\"small\" style=\"margin:0 0 8px\">" + row[2] + "</p>";
+  });
+  html += "<h3>Ailments</h3>";
+  if (!S.ailments.length) html += '<p class="small">No ailments.</p>';
+  S.ailments.forEach(function (al, i) {
+    html += '<div class="itemrow"><div><b>' + esc(al.name) + '</b> <span>' + al.kind + ', drains health until treated</span></div><span><button class="btn2 btnsm" type="button" data-treat-clinic="' + i + '">Clinic, 20 caps</button> <button class="btn2 btnsm" type="button" data-treat-item="' + i + '">Use ' + (al.kind === "injury" ? "bandage" : "medkit") + "</button></span></div>";
+  });
+  html += "</div>";
+  html += '<div class="card"><h2>Save</h2><div class="row"><button class="btn2" type="button" data-act="export">Export save</button><label class="btn2" style="cursor:pointer">Import save<input type="file" id="importFile" accept=".json,application/json" style="display:none"></label><button class="btn2" type="button" data-act="replay-intro">Replay intro story</button></div><p class="small">Saves live on this device only. Export downloads a JSON file. Import replaces the current profile in this slot.</p></div>';
+  el.innerHTML = html;
+  el.querySelectorAll("[data-attr]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (S.points <= 0) return;
+      S.attrs[b.getAttribute("data-attr")] += 1; S.points -= 1;
+      showMsg("Attribute raised. Work pay, scavenge yield, and farm yield formulas use it right away.");
+      save(); renderAll();
+    });
+  });
+  el.querySelectorAll("[data-act]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = b.getAttribute("data-act");
+      if (a === "export") exportSave();
+      else if (a === "replay-intro") startIntro("game");
+      else if (a === "exit-test") exitTestMode();
+    });
+  });
+  el.querySelectorAll("[data-treat-clinic]").forEach(function (b) { b.addEventListener("click", function () { treatAilment(parseInt(b.getAttribute("data-treat-clinic"), 10), "clinic"); }); });
+  el.querySelectorAll("[data-treat-item]").forEach(function (b) { b.addEventListener("click", function () { treatAilment(parseInt(b.getAttribute("data-treat-item"), 10), "item"); }); });
+  var imp = $("importFile");
+  if (imp) imp.addEventListener("change", function () {
+    var f = imp.files && imp.files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function () { try { importSaveText(rd.result); } catch (e) { showMsg("That file is not a STARS save."); } };
+    rd.readAsText(f);
+  });
+}
+
+/* ================= Radio tab ================= */
+var newsCache = { items: null, at: 0, failed: false };
+function radioAlertsHTML() {
+  var w = S.weather;
+  if (!w) return "<p>No alerts for your city: no live weather signal right now.</p>";
+  var alerts = [];
+  if (weatherInfo().storm) alerts.push("Storm conditions now: shelter or travel with care.");
+  w.forecast.forEach(function (f) {
+    if (f.max >= 35) alerts.push("Extreme heat expected on " + f.date + " (up to " + f.max + " C). Carry extra water.");
+    if (f.min <= 0) alerts.push("Extreme cold expected on " + f.date + " (down to " + f.min + " C). Eat more to stay warm.");
+    if (f.precip !== null && f.precip >= 70) alerts.push("Heavy rain likely on " + f.date + " (rain chance " + f.precip + "%). Good for crops, bad for roads.");
+  });
+  if (!alerts.length) return "<p>No alerts for your city.</p>";
+  return "<p>" + alerts.join("<br>") + "</p>";
+}
+function ensureAudio() {
+  if (radioState.audio) return radioState.audio;
+  try {
+    var a = new Audio();
+    a.volume = radioState.volume;
+    a.addEventListener("error", function () {
+      radioState.track = (radioState.track + 1) % VINTAGE_PLAYLIST.length;
+      var line = $("nowPlaying");
+      if (line) line.textContent = "Signal lost, next track: " + VINTAGE_PLAYLIST[radioState.track].title;
+      if (radioState.playing) { a.src = VINTAGE_PLAYLIST[radioState.track].url; try { var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    });
+    a.addEventListener("ended", function () {
+      radioState.track = (radioState.track + 1) % VINTAGE_PLAYLIST.length;
+      if (radioState.playing) { a.src = VINTAGE_PLAYLIST[radioState.track].url; try { var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+      renderRadio();
+    });
+    radioState.audio = a;
+  } catch (e) { radioState.audio = null; }
+  return radioState.audio;
+}
+function fetchNews() {
+  if (newsCache.items && Date.now() - newsCache.at < 900000) return;
+  fetch("https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent("https://feeds.bbci.co.uk/news/world/rss.xml"))
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.items && d.items.length) { newsCache = { items: d.items.slice(0, 8), at: Date.now(), failed: false }; }
+      else { newsCache.failed = true; }
+      renderRadio();
+    })
+    .catch(function () { newsCache.failed = true; renderRadio(); });
+}
+function renderRadio() {
+  var el = $("view-radio");
+  var track = VINTAGE_PLAYLIST[radioState.track];
+  var html = "<h1>World Radio</h1><p class=\"small\">" + (S.radioBoostDate === todayStr() ? "Tower boost active today." : "Visit the Radio Tower on the World tab for a daily signal boost.") + "</p>";
+  html += '<div class="row">';
+  [1, 2, 3].forEach(function (n) {
+    html += '<button class="btn2" type="button" data-station="' + n + '"' + (radioState.station === n ? ' style="border-color:var(--amber);color:var(--gold)"' : "") + ">Station 0" + n + (n === 1 ? " Music" : n === 2 ? " News" : " Alarm") + "</button>";
+  });
+  html += "</div>";
+  if (radioState.station === 1) {
+    html += '<div class="card"><h2>Station 01: Music</h2><p id="nowPlaying">Now playing: ' + esc(track.title) + " by " + esc(track.artist) + "</p>";
+    html += '<div class="row"><button class="btn" type="button" data-act="play-pause">' + (radioState.playing ? "Pause" : "Play") + '</button><button class="btn2" type="button" data-act="next">Next</button></div>';
+    html += '<label for="volRange">Volume</label><input type="range" id="volRange" min="0" max="100" value="' + Math.round(radioState.volume * 100) + '">';
+    html += '<p class="small">Vintage public-domain music, streamed from archive.org. If a track fails, the player skips to the next one and says so.</p></div>';
+  } else if (radioState.station === 2) {
+    html += '<div class="card"><h2>Station 02: Worldwide News</h2>';
+    if (newsCache.items) {
+      newsCache.items.forEach(function (it) {
+        html += '<div class="newsitem"><b>' + esc(it.title) + '</b><br><span class="small">BBC World · ' + esc(it.pubDate || "") + "</span></div>";
+      });
+    } else {
+      html += '<p><b>Wasteland bulletins (no live signal)</b></p>';
+      WASTELAND_BULLETINS.forEach(function (b) {
+        html += '<div class="newsitem"><b>' + esc(b.title) + '</b><br><span class="small">' + esc(b.time) + "</span></div>";
+      });
+      html += '<p class="small">Live headlines arrive when the news feed answers. Until then these clearly labeled in-world bulletins stand in, and real news is never mixed with fiction.</p>';
+    }
+    html += '<button class="btn2 btnsm" type="button" data-act="refresh-news">Refresh news</button></div>';
+  } else {
+    html += '<div class="card"><h2>Station 03: Alarm</h2><p class="small">A siren made in your browser with WebAudio. No audio file needed.</p><div class="row"><button class="btn" type="button" data-act="siren-start">Start siren</button><button class="btn2" type="button" data-act="siren-stop">Stop siren</button></div>';
+    html += "<h3>Survival alerts for " + esc(S.city) + "</h3>" + radioAlertsHTML() + "</div>";
+  }
+  el.innerHTML = html;
+  el.querySelectorAll("[data-station]").forEach(function (b) {
+    b.addEventListener("click", function () { radioState.station = parseInt(b.getAttribute("data-station"), 10); if (radioState.station === 2) fetchNews(); renderAll(); });
+  });
+  el.querySelectorAll("[data-act]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var a = b.getAttribute("data-act");
+      if (a === "play-pause") {
+        var au = ensureAudio();
+        if (!au) { showMsg("Audio is not available in this browser."); return; }
+        if (radioState.playing) { try { au.pause(); } catch (e) {} radioState.playing = false; }
+        else {
+          if (!au.src || au.src.indexOf(encodeURIComponent(track.title)) < 0) au.src = track.url;
+          else if (!au.src) au.src = track.url;
+          try { var p = au.play(); if (p && p.catch) p.catch(function () { showMsg("The stream could not start. Try Next."); }); } catch (e) { showMsg("The stream could not start. Try Next."); }
+          radioState.playing = true;
+          bumpEmotion("hope", 10, "Listening to the radio music station raised hope.");
+          save();
+        }
+        renderAll();
+      } else if (a === "next") {
+        radioState.track = (radioState.track + 1) % VINTAGE_PLAYLIST.length;
+        var au2 = ensureAudio();
+        if (au2 && radioState.playing) { au2.src = VINTAGE_PLAYLIST[radioState.track].url; try { var p2 = au2.play(); if (p2 && p2.catch) p2.catch(function () {}); } catch (e) {} }
+        renderAll();
+      } else if (a === "refresh-news") { newsCache = { items: null, at: 0, failed: false }; fetchNews(); }
+      else if (a === "siren-start") startSiren();
+      else if (a === "siren-stop") stopSiren();
+    });
+  });
+  var vol = $("volRange");
+  if (vol) vol.addEventListener("input", function () {
+    radioState.volume = vol.value / 100;
+    var au = ensureAudio();
+    if (au) au.volume = radioState.volume;
+  });
+}
+function startSiren() {
+  try {
+    if (!window.AudioContext && !window.webkitAudioContext) { showMsg("WebAudio is not available in this browser."); return; }
+    stopSiren();
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    var ctx = new Ctx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.value = 500;
+    gain.gain.value = 0.08;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start();
+    var high = false;
+    var timer = setInterval(function () { high = !high; try { osc.frequency.value = high ? 900 : 500; } catch (e) {} }, 400);
+    sirenNodes = { ctx: ctx, osc: osc, gain: gain, timer: timer };
+    showMsg("Siren sounding. Tap Stop siren to silence it.");
+  } catch (e) { showMsg("The siren could not start in this browser."); }
+}
+function stopSiren() {
+  if (!sirenNodes) return;
+  try { clearInterval(sirenNodes.timer); sirenNodes.osc.stop(); sirenNodes.ctx.close(); } catch (e) {}
+  sirenNodes = null;
+}
+
+/* ================= Watch ================= */
+function watchSummaryText() {
+  return "fitness " + Math.round(S.healthDetail.fitness) + ", wellbeing " + wellbeing() + ", level " + S.level + ", location " + S.city + ", " + S.currentSite;
+}
+function updateWatch() {
+  if (!S) return;
+  var now = new Date();
+  $("watchTime").textContent = ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2);
+  $("watchDayNight").textContent = isNightNow() ? "Night" : "Day";
+  $("watchStats").innerHTML = "Health " + Math.round(S.stats.health) + " · Hunger " + Math.round(S.stats.hunger) + " · Thirst " + Math.round(S.stats.thirst) + "<br>Energy " + Math.round(S.stats.energy) + " · Morale " + Math.round(S.stats.morale) + " · Level " + S.level + "<br>Fitness " + Math.round(S.healthDetail.fitness) + " · Wellbeing " + wellbeing();
+  var em = dominantEmotion();
+  $("watchEmotion").innerHTML = emotionIcon(em.key) + " Feeling " + em.name;
+  $("watchLocation").textContent = S.city + ", " + S.currentSite;
+}
+function openWatch() { $("watchOverlay").classList.remove("hidden"); updateWatch(); }
+function closeWatch() { $("watchOverlay").classList.add("hidden"); }
+
+/* ================= Clan tab ================= */
+function makeInviteCode() {
+  var chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", out = "";
+  for (var i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return "STARS-" + out;
+}
+function renderClan() {
+  var el = $("view-clan");
+  if (!S.clan) {
+    var html = "<h1>Clan</h1><p class=\"small\">Band together under one banner. Your clan starts with just you. No fake members are ever invented.</p><div class=\"card\">";
+    html += '<label for="clanName">Clan name</label><input id="clanName" maxlength="30" placeholder="Clan name"><label for="clanMotto">Motto</label><input id="clanMotto" maxlength="80" placeholder="Motto"><label>Banner color</label><div class="row" id="clanColors"></div>';
+    html += '<button class="btn" type="button" data-act="create-clan" style="margin-top:12px">Create clan</button></div>';
+    html += '<p class="small">Live sharing with real players and joining other players\' clans arrives with the multiplayer phase. For now, creating a clan only sets up your own banner and roster.</p>';
+    el.innerHTML = html;
+    var colors = ["#f5b942", "#7ed491", "#7ab8ff", "#ff7a6b", "#c9a0ff", "#ece8db"];
+    var sel = 0;
+    var draw = function () {
+      $("clanColors").innerHTML = colors.map(function (c, i) {
+        return '<button type="button" class="optbtn' + (i === sel ? " sel" : "") + '" data-c="' + i + '"><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:' + c + '"></span></button>';
+      }).join("");
+      $("clanColors").querySelectorAll("button").forEach(function (b) {
+        b.addEventListener("click", function () { sel = parseInt(b.getAttribute("data-c"), 10); draw(); });
+      });
+    };
+    draw();
+    el.querySelector("[data-act]").addEventListener("click", function () {
+      var nm = $("clanName").value.trim(), mo = $("clanMotto").value.trim();
+      if (!nm) { showMsg("Name your clan first."); return; }
+      S.clan = { name: nm, motto: mo, color: colors[sel], code: makeInviteCode() };
+      showMsg("Clan " + nm + " created. You are its first and only member.");
+      save(); renderAll();
+    });
+    return;
+  }
+  var c = S.clan;
+  var card = "STARS clan invite: " + c.name + " - " + (c.motto || "No motto yet.") + " - Invite code: " + c.code + " - Leader: " + S.name + " - Watch summary: " + watchSummaryText() + ". Live clan joining arrives with the multiplayer phase.";
+  var html = "<h1>Clan</h1><div class=\"card\" style=\"border-top:6px solid " + c.color + "\"><h2>" + esc(c.name) + "</h2><p>" + esc(c.motto || "No motto yet.") + "</p><p class=\"small\">Invite code: <b>" + c.code + "</b></p>";
+  html += "<h3>Roster</h3><p>" + esc(S.name) + " (leader, level " + S.level + ") - the only member so far. No fake members are ever added.</p>";
+  html += '<button class="btn" type="button" data-act="share-clan">Share invite card</button><p class="small" id="clanShareNote"></p><textarea id="clanShareText" style="display:none;width:100%;height:120px;margin-top:10px">' + esc(card) + "</textarea></div>";
+  html += '<p class="small">Live sharing with real players and joining other players\' clans arrives with the multiplayer phase. The Share button copies the invite card text for now.</p>';
+  el.innerHTML = html;
+  el.querySelector("[data-act]").addEventListener("click", function () {
+    window._lastClanShare = card;
+    var ta = $("clanShareText");
+    ta.style.display = "block";
+    ta.select();
+    var note = $("clanShareNote");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(card).then(function () { note.textContent = "Invite card copied. Paste it anywhere to share it."; }).catch(function () { note.textContent = "Copy the invite card text below by hand."; });
+    } else {
+      note.textContent = "Copy the invite card text below by hand.";
+    }
+  });
+}
+
+/* ================= Intro story ================= */
+function buildStars() {
+  var box = $("stars");
+  if (!box || box.childElementCount) return;
+  for (var i = 0; i < 46; i++) {
+    var s = document.createElement("span");
+    s.className = "star";
+    var size = 1 + Math.floor(Math.random() * 3);
+    s.style.width = size + "px"; s.style.height = size + "px";
+    s.style.left = Math.floor(Math.random() * 100) + "%";
+    s.style.top = Math.floor(Math.random() * 100) + "%";
+    s.style.animationDelay = (Math.random() * 3).toFixed(1) + "s";
+    box.appendChild(s);
+  }
+}
+function introRender() {
+  var box = $("introtext");
+  var html = "";
+  for (var i = 0; i < INTRO_LINES.length; i++) {
+    if (i < introState.idx) html += '<span class="beat">' + esc(INTRO_LINES[i]) + "</span>";
+    else if (i === introState.idx) html += '<span class="beat">' + esc(INTRO_LINES[i].slice(0, introState.pos)) + "</span>";
+  }
+  box.innerHTML = html;
+}
+function introStep() {
+  clearTimeout(introState.timer);
+  var line = INTRO_LINES[introState.idx];
+  if (introState.pos < line.length) {
+    introState.pos += 1;
+    introRender();
+    introState.timer = setTimeout(introStep, 22);
+  } else if (introState.idx < INTRO_LINES.length - 1) {
+    introState.idx += 1; introState.pos = 0;
+    introRender();
+    introState.timer = setTimeout(introStep, 550);
+  } else {
+    introState.done = true;
+    $("introBegin").classList.remove("hidden");
+  }
+}
+function startIntro(returnTo) {
+  introState = { idx: 0, pos: 0, timer: null, done: false, reduced: false, returnTo: returnTo || "creator" };
+  buildStars();
+  $("introBegin").classList.add("hidden");
+  $("intro").classList.add("on");
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    introState.reduced = true;
+    introState.idx = INTRO_LINES.length - 1;
+    introState.pos = INTRO_LINES[introState.idx].length;
+    introRender();
+    introState.done = true;
+    $("introBegin").classList.remove("hidden");
+    return;
+  }
+  introRender();
+  introState.timer = setTimeout(introStep, 300);
+}
+function finishIntro() {
+  clearTimeout(introState.timer);
+  $("intro").classList.remove("on");
+  if (introState.returnTo === "creator") {
+    $("creator").classList.remove("hidden");
+    renderCreator();
+  }
+}
+
+/* ================= Test survivor, start screen, boot ================= */
+function makeTestSurvivor() {
+  var farm = [];
+  farm.push({ crop: "greens", plantedAt: Date.now() - 3 * 3600000, watered: true });
+  farm.push({ crop: "grain", plantedAt: Date.now() - 2 * 3600000, watered: false });
+  farm.push({ crop: "roots", plantedAt: Date.now() - 1 * 3600000, watered: true });
+  farm.push({ crop: null, plantedAt: 0, watered: false });
+  var t = {
+    name: "Test Survivor", job: "scavenger", attrs: { str: 7, agi: 9, end: 7, int: 5, cha: 6 }, points: 2,
+    appearance: { skin: 1, hair: 0, hairColor: 0, jacket: 0 },
+    city: "Test City", country: "Testland", baseName: "Test Base", lat: null, lon: null,
+    level: 3, xp: 40, caps: 500, day0: todayStr(),
+    stats: { health: 100, hunger: 85, thirst: 85, energy: 90, morale: 75 },
+    inventory: { canned_beans: 4, water_bottle: 4, scrap: 20, wood: 12, cloth: 10, herb: 3, bandage: 2, medkit: 1, seed_greens: 3, seed_grain: 2, seed_roots: 2 },
+    equipped: { tool: null, weapon: null }, chest: { scrap: 5 },
+    rooms: { bed: 1, storage: 1, kitchen: 1, workshop: 1 },
+    farm: farm, lastSeen: Date.now(), lastShiftDate: "", lastRest: 0, oddCooldowns: {},
+    pet: { adopted: true, name: "Scout", coat: 0, hunger: 85, loyalty: 60, training: 30 },
+    weapons: [{ key: "blade", tier: 2, dur: 50, maxDur: 60, equipped: true }],
+    armor: [{ key: "plate", tier: 1, dur: 60, maxDur: 60, equipped: true }],
+    vehicles: [], activeVehicle: null,
+    buildings: {
+      greenhouse: { state: "none", tier: 0, doneAt: 0 },
+      watchtower: { state: "none", tier: 0, doneAt: 0 },
+      garage: { state: "none", tier: 0, doneAt: 0 },
+      watertank: { state: "none", tier: 0, doneAt: 0 },
+      shed: { state: "none", tier: 0, doneAt: 0 }
+    },
+    radioBoostDate: "", lastScavenge: 0, weather: null, weatherAt: 0
+  };
+  return t;
+}
+function applyOfflineDecay() {
+  if (!S || !S.lastSeen) return;
+  var hours = Math.min(12, (Date.now() - S.lastSeen) / 3600000);
+  if (hours > 0.05) { applyDecay(hours); showMsg("While you were away, " + hours.toFixed(1) + " hours passed in the world (offline decay capped at 12 hours)."); }
+}
+function enterGame() {
+  $("start").classList.add("hidden");
+  $("creator").classList.add("hidden");
+  $("intro").classList.remove("on");
+  $("game").classList.remove("hidden");
+  buildTabbar();
+  switchTab("home");
+  fetchWeather(false);
+}
+function showStartScreen() {
+  $("game").classList.add("hidden");
+  $("creator").classList.add("hidden");
+  $("intro").classList.remove("on");
+  $("start").classList.remove("hidden");
+  var real = loadSave(SAVE_KEY);
+  if (real) {
+    $("continueWrap").classList.remove("hidden");
+    $("continueName").textContent = "Continue as " + real.name + " (level " + real.level + ", Day " + (function () { var d0 = new Date(real.day0 + "T00:00:00"); var nw = new Date(todayStr() + "T00:00:00"); return Math.floor((nw - d0) / 86400000) + 1; })() + ").";
+    $("startNote").textContent = "Starting a new survivor will replace this save when you finish the creator.";
+  } else {
+    $("continueWrap").classList.add("hidden");
+    $("startNote").textContent = "";
+  }
+}
+function exitTestMode() {
+  S = null;
+  isTestMode = false;
+  activeKey = SAVE_KEY;
+  stopSiren();
+  showStartScreen();
+}
+$("testLoginBtn").addEventListener("click", function () {
+  activeKey = TEST_SAVE_KEY;
+  isTestMode = true;
+  var t = loadSave(TEST_SAVE_KEY);
+  S = t || makeTestSurvivor();
+  normalizeSave();
+  applyOfflineDecay();
+  save();
+  enterGame();
+  showMsg("TEST mode: this survivor is labeled TEST everywhere. Exit test mode returns here without touching your real survivor.");
+});
+$("newSurvivorBtn").addEventListener("click", function () {
+  S = null;
+  isTestMode = false;
+  activeKey = SAVE_KEY;
+  $("start").classList.add("hidden");
+  startIntro("creator");
+});
+$("continueBtn").addEventListener("click", function () {
+  var real = loadSave(SAVE_KEY);
+  if (!real) { showStartScreen(); return; }
+  activeKey = SAVE_KEY;
+  isTestMode = false;
+  S = real;
+  normalizeSave();
+  applyOfflineDecay();
+  save();
+  enterGame();
+});
+$("geoBtn").addEventListener("click", useMyCity);
+$("startBtn").addEventListener("click", startGame);
+$("introSkip").addEventListener("click", finishIntro);
+$("introBegin").addEventListener("click", finishIntro);
+$("introtext").addEventListener("click", function () {
+  if (introState.done || introState.reduced) return;
+  clearTimeout(introState.timer);
+  introState.pos = INTRO_LINES[introState.idx].length;
+  introRender();
+  introState.timer = setTimeout(introStep, 550);
+});
+$("watchBtn").addEventListener("click", openWatch);
+$("watchClose").addEventListener("click", closeWatch);
+$("watchOverlay").addEventListener("click", function (e) { if (e.target === $("watchOverlay")) closeWatch(); });
+setInterval(function () {
+  if (!S) return;
+  updateHud();
+  applyDayNight();
+  if (!$("watchOverlay").classList.contains("hidden")) updateWatch();
+}, 30000);
+showStartScreen();
+
+</script>
+</body>
+</html>
